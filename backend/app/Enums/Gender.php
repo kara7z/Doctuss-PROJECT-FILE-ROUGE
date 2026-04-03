@@ -2,10 +2,10 @@
 
 namespace App\Enums;
 
-enum UserStatus: string
+enum Gender: string
 {
-    case ACTIVE    = 'active';
-    case SUSPENDED = 'suspended';
+    case MALE   = 'male';
+    case FEMALE = 'female';
 
     public static function values(): array
     {

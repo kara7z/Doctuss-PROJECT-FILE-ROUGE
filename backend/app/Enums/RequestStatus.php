@@ -2,10 +2,11 @@
 
 namespace App\Enums;
 
-enum UserStatus: string
+enum RequestStatus: string
 {
-    case ACTIVE    = 'active';
-    case SUSPENDED = 'suspended';
+    case PENDING = 'pending';
+    case APPROVED = 'approved';
+    case REJECTED = 'rejected';
 
     public static function values(): array
     {
