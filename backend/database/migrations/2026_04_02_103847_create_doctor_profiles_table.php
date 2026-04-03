@@ -6,20 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('doctor_profiles', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->unique()->constrained()->cascadeOnDelete();
+            $table->foreignId('doctor_specialty_id')->constrained('doctor_specialties')->cascadeOnDelete();
+            $table->date('experience_start_date');
+            $table->string('hospital_name');
+            $table->string('city');
+            $table->string('phone_number')->nullable();
+            $table->string('profile_picture')->nullable();
+            $table->string('banner_picture')->nullable();
+            $table->decimal('hospital_lat', 10, 7)->nullable();
+            $table->decimal('hospital_lng', 10, 7)->nullable();
+            $table->text('bio')->nullable();
+            $table->boolean('is_verified')->default(false);
+            $table->decimal('avg_rating', 3, 2)->default(0);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('doctor_profiles');
