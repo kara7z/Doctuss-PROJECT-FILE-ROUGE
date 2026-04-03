@@ -3,47 +3,32 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\DoctorResource;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class DoctorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request): AnonymousResourceCollection
     {
-        //
+        $query = User::query()
+            ->where('role', 'doctor')
+            ->whereHas('doctorProfile', fn ($q) => $q->where('is_verified', true))
+            ->with([
+                'doctorProfile.specialty.category',
+            ]);
+
+        return DoctorResource::collection($query->latest()->paginate(15));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function show(User $user): DoctorResource
     {
-        //
-    }
+        abort_unless($user->isDoctor() && $user->doctorProfile, 404);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return new DoctorResource(
+            $user->load('doctorProfile.specialty.category')
+        );
     }
 }
+
