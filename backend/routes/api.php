@@ -29,10 +29,10 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::apiResource('appointments', AppointmentController::class);
 
     Route::apiResource('schedules', ScheduleController::class)
-         ->middleware('role:doctor');
+        ->middleware('role:doctor');
 
     Route::apiResource('reviews', ReviewController::class)
-         ->only(['store', 'show', 'index']);
+        ->only(['store', 'show', 'index']);
 
     Route::middleware('role:admin')->group(function () {
         Route::patch('/admin/users/{user}/suspend', [AdminModerationController::class, 'suspendUser']);
