@@ -15,6 +15,7 @@ Route::post('/login',    [AuthController::class, 'login']);
 
 Route::get('/doctors',        [DoctorController::class, 'index']);
 Route::get('/doctors/{user}', [DoctorController::class, 'show']);
+Route::get('/specialties',    [DoctorController::class, 'specialties']);
 
 // ── Authenticated ─────────────────────────────────────────────
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
