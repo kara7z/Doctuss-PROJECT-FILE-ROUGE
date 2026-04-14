@@ -56,6 +56,7 @@ onUnmounted(() => {
 </script>
 <template>
   <section class="heroSection">
+    <div class="heroBg"></div>
     <div class="heroContent">
       <div class="titleWrapper">
         <h1>
@@ -77,23 +78,73 @@ onUnmounted(() => {
     </div>
   </section>
   
-  <div>
+  <div class="Discover-Text">
+    <span>
+      Discover the <h1>online</h1> appointment!
+    </span>
+    <p>Find and book appointments with trusted doctors near you. Browse by specialty, read patient reviews, and get the care you need — all in one place.</p>
+  </div>
 
+  <div class="stepsSection">
+    <div class="stepCard">
+      <div class="stepIcon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </div>
+      <span class="stepNumber">01</span>
+      <h3>Find a Doctor</h3>
+      <p>Search by specialty, location, or name to find the right doctor for your needs.</p>
+    </div>
+    <div class="stepDivider">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </div>
+    <div class="stepCard">
+      <div class="stepIcon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <span class="stepNumber">02</span>
+      <h3>View Profile</h3>
+      <p>Read reviews, check qualifications, and explore availability before deciding.</p>
+    </div>
+    <div class="stepDivider">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </div>
+    <div class="stepCard">
+      <div class="stepIcon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <span class="stepNumber">03</span>
+      <h3>Book a Visit</h3>
+      <p>Pick a time that works for you and confirm your appointment in seconds.</p>
+    </div>
   </div>
 </template>
 <style>
 .heroSection{
     width: 100%;
     height: 100vh;
-    background-image: url('@/assets/pictures/medical1.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
     overflow: hidden;
+}
+.heroBg{
+    position: absolute;
+    inset: 0;
+    background-image: url('@/assets/pictures/medical1.jpg');
+    background-size: cover;
+    background-position: center;
+    animation: zoomBg 12s ease-in-out infinite alternate;
+}
+.heroBg::after{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.15);
+}
+@keyframes zoomBg {
+    from { transform: scale(1); }
+    to { transform: scale(1.12); }
 }
 .heroContent{
     display: flex;
@@ -111,6 +162,118 @@ onUnmounted(() => {
     box-shadow: 
         0 20px 60px rgba(0, 0, 0, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.Discover-Text{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 12px 20%;
+  gap:12px;
+  span{
+    display: flex;
+    font-size:36px;
+    gap:6px;
+  }
+  h1{
+    font-size: 36px;
+    font-width: bold;
+  }
+  p{
+    font-size: 20px;
+  }
+}
+@media (max-width: 768px) {
+  .Discover-Text {
+    padding: 12px 8%;
+    span { font-size: 26px; }
+    h1 { font-size: 26px; }
+    p { font-size: 16px; }
+  }
+}
+@media (max-width: 480px) {
+  .Discover-Text {
+    padding: 12px 5%;
+    span { font-size: 20px; }
+    h1 { font-size: 20px; }
+    p { font-size: 14px; }
+  }
+}
+.stepsSection{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 48px 6%;
+  flex-wrap: wrap;
+}
+.stepCard{
+  user-select: none;
+  flex: 1;
+  min-width: 220px;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 36px 24px;
+  border-radius: 20px;
+  border: 3px solid black;
+  background: #F6D506;
+  box-shadow: rgba(0,0,0,0.1) 0px 4px 12px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  gap: 10px;
+}
+.stepCard:hover{
+  transform: translateY(-8px);
+  box-shadow: rgba(0,0,0,0.2) 0px 16px 32px;
+}
+.stepIcon{
+  width: 64px;
+  height: 64px;
+  background: black;
+  color: #F6D506;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.stepNumber{
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  opacity: 0.4;
+  text-transform: uppercase;
+}
+.stepCard h3{
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+}
+.stepCard p{
+  font-size: 14px;
+  opacity: 0.7;
+  margin: 0;
+  line-height: 1.6;
+}
+.stepDivider{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.4;
+}
+@media (max-width: 768px) {
+  .stepsSection { padding: 32px 4%; gap: 16px; }
+  .stepDivider { transform: rotate(90deg); }
+}
+@media (max-width: 600px) {
+  .stepsSection { flex-direction: column; align-items: center; }
+  .stepDivider { transform: rotate(90deg); }
+  .stepCard { max-width: 100%; width: 100%; }
 }
 @keyframes fadeInUp {
     from {
