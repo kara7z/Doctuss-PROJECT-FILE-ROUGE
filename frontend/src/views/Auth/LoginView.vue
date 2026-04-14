@@ -1,5 +1,7 @@
 <script setup>
 import { ref } from 'vue'
+import { api } from '@/config/api'
+
 const error = ref('')
 const success = ref(false)
 const formData = ref({
@@ -12,22 +14,11 @@ const login = async (e) => {
   success.value = false
 
   try {
-    // Get CSRF token first
-    await fetch('http://localhost:8000/sanctum/csrf-cookie', {
-      credentials: 'include',
-    })
-
-    // Then make the login request
-    const response = await fetch('http://localhost:8000/api/login', {
+    const response = await api('/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
       body: JSON.stringify(formData.value),
-      credentials: 'include',
     })
-    let data
+    let data;
     try {
       data = await response.json()
     } catch {
