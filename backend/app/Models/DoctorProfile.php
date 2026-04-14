@@ -6,7 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Validation\ValidationException;
+use App\Enums\AppointmentStatus;
+use Carbon\Carbon;
 
 class DoctorProfile extends Model
 {
@@ -75,6 +78,51 @@ class DoctorProfile extends Model
     public function verificationRequests(): HasMany
     {
         return $this->hasMany(VerificationRequest::class);
+    }
+
+    public function reviews(): HasManyThrough
+    {
+        return $this->hasManyThrough(Review::class, Appointment::class, 'doctor_profile_id', 'appointment_id');
+    }
+
+    public function getCurrentStatusAttribute(): string
+    {
+        $now = now();
+        $todayIndex = $now->dayOfWeek; 
+        $todaysSchedules = $this->schedules->where('day_of_week', $todayIndex);
+
+        if ($todaysSchedules->isEmpty()) {
+            return 'Offline';
+        }
+
+        $currentTime = $now->format('H:i:s');
+        $isDuringShift = false;
+        foreach ($todaysSchedules as $schedule) {
+            if ($currentTime >= $schedule->start_time && $currentTime <= $schedule->end_time) {
+                $isDuringShift = true;
+                break;
+            }
+        }
+
+        if (!$isDuringShift) {
+            return 'Offline';
+        }
+
+        // Must eager load appointments!
+        $activeAppointments = $this->appointments
+            ->where('status', AppointmentStatus::APPROVED)
+            ->filter(function ($appt) use ($now) {
+                if (!$appt->proposed_at) return false;
+                $start = Carbon::parse($appt->proposed_at);
+                $end = $start->copy()->addHour();
+                return $now->between($start, $end);
+            });
+
+        if ($activeAppointments->isNotEmpty()) {
+            return 'Busy';
+        }
+
+        return 'Available';
     }
 
 }

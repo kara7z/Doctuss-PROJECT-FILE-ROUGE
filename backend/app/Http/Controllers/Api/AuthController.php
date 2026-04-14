@@ -9,6 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -20,20 +21,46 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['nullable', 'in:client,doctor'],
-            'gender' => ['required', 'in:' . implode(',', Gender::values())],
-            'birthday' => ['required', 'date', 'before:today'],
+            'role' => ['required', 'in:client,doctor'],
+            'gender' => ['required', 'in:' . implode(',', \App\Enums\Gender::values())],
+            'birthday' => ['required', 'date', $request->role === 'doctor' ? 'before:-18 years' : 'before:today'],
         ]);
+
+        if ($data['role'] === 'doctor') {
+            $doctorData = $request->validate([
+                'doctor_specialty_id' => ['required', 'exists:doctor_specialties,id'],
+                'experience_start_date' => ['required', 'date', 'before:today', 'after:birthday'],
+                'hospital_name' => ['required', 'string', 'max:255'],
+                'city' => ['required', 'string', 'max:255'],
+                'phone_number' => ['required', 'string', 'max:20'],
+                'bio' => ['required', 'string'],
+            ]);
+        }
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
-            'role' => $data['role'] ?? 'client',
+            'role' => $data['role'],
             'status' => UserStatus::ACTIVE,
             'gender' => $data['gender'],
             'birthday' => $data['birthday'],
         ]);
+
+        if ($data['role'] === 'doctor') {
+            \App\Models\DoctorProfile::create([
+                'user_id' => $user->id,
+                'doctor_specialty_id' => $doctorData['doctor_specialty_id'],
+                'experience_start_date' => $doctorData['experience_start_date'],
+                'hospital_name' => $doctorData['hospital_name'],
+                'city' => $doctorData['city'],
+                'phone_number' => $doctorData['phone_number'],
+                'bio' => $doctorData['bio'],
+                'is_verified' => false,
+            ]);
+        }
+
+        Auth::login($user);
 
         $token = $user->createToken('auth-token')->plainTextToken;
 
@@ -66,6 +93,8 @@ class AuthController extends Controller
             ], 403);
         }
 
+        Auth::login($user);
+
         $token = $user->createToken('auth-token')->plainTextToken;
         return response()->json([
             'message' => 'Logged in successfully.',
@@ -77,7 +106,10 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()?->delete();
+        Auth::guard('web')->logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json([
             'message' => 'Logged out successfully.',

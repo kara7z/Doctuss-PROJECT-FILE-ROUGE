@@ -34,8 +34,10 @@ class DoctorResource extends JsonResource
                     'hospital_lat' => $profile->hospital_lat,
                     'hospital_lng' => $profile->hospital_lng,
                     'bio' => $profile->bio,
+                    'current_status' => $profile->current_status,
                     'is_verified' => $profile->is_verified,
                     'avg_rating' => $profile->avg_rating,
+                    'reviews_count' => $profile->reviews_count ?? 0,
                     'specialty' => $specialty ? [
                         'id' => $specialty->id,
                         'name' => $specialty->name,
