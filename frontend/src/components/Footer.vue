@@ -1,4 +1,4 @@
-<template>
+ <template>
     <footer>
         <div class="footerGrid">
             <div class="footerBrand">
@@ -64,140 +64,138 @@
     </footer>
 </template>
 <style>
-footer{
-    margin: 0 20px;
-    padding: 48px 52px 0;
+footer {
+    margin: 40px 20px 0;
+    padding: 60px 60px 0;
     border-radius: 24px 24px 0 0;
     background-color: #F6D506;
-    border: black 3px solid;
+    border: black 4px solid;
+    border-bottom: none;
     color: black;
-    box-shadow: rgba(0, 0, 0, 0.25) 0px 4px 4px;
+    box-shadow: 0px -8px 0px rgba(0,0,0,1);
+    position: relative;
+    z-index: 10;
 }
-.footerGrid{
+.footerGrid {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr 1.2fr;
     gap: 48px;
-    padding-bottom: 32px;
-    border-bottom: 2px solid rgba(0,0,0,0.2);
+    padding-bottom: 40px;
+    border-bottom: 4px solid #000;
 }
-.footerLogo{
-    font-size: 30px;
+.footerLogo {
+    font-size: 36px;
     font-weight: 900;
     display: block;
-    margin-bottom: 12px;
-    letter-spacing: -0.5px;
+    margin-bottom: 16px;
+    letter-spacing: -1.5px;
+    text-transform: uppercase;
 }
-.footerBrand p{
-    font-size: 13.5px;
-    line-height: 1.7;
-    max-width: 230px;
-    opacity: 0.75;
-    margin: 0 0 20px;
+.footerBrand p {
+    font-size: 15px;
+    line-height: 1.6;
+    font-weight: 600;
+    max-width: 250px;
+    margin: 0 0 24px;
 }
-.footerSocials{
+.footerSocials {
     display: flex;
-    gap: 10px;
+    gap: 12px;
 }
-.footerSocials a{
-    width: 34px;
-    height: 34px;
+.footerSocials a {
+    width: 42px;
+    height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.08);
-    border-radius: 8px;
+    background: #fff;
+    border: 3px solid #000;
+    border-radius: 0px;
     color: black;
-    transition: background 0.2s;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.footerSocials a:hover{
-    background: rgba(0,0,0,0.18);
+.footerSocials a:hover {
+    background: #000;
+    color: #F6D506;
+    transform: translate(-3px, -3px);
+    box-shadow: 6px 6px 0px rgba(0,0,0,1);
 }
-.footerCol h4{
-    font-size: 11px;
-    font-weight: 800;
-    margin: 0 0 16px;
+.footerCol h4 {
+    font-size: 14px;
+    font-weight: 900;
+    margin: 0 0 20px;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    opacity: 0.5;
 }
-.footerCol ul{
+.footerCol ul {
     list-style: none;
     padding: 0;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    font-size: 14px;
+    gap: 12px;
+    font-size: 16px;
 }
-.footerCol ul li a{
+.footerCol ul li a {
     color: black;
     text-decoration: none;
-    font-weight: 500;
-    opacity: 0.8;
-    transition: opacity 0.2s;
+    font-weight: 700;
+    display: inline-block;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.footerCol ul li a:hover{
-    opacity: 1;
-    text-decoration: underline;
+.footerCol ul li a:hover {
+    transform: translateX(5px);
+    text-shadow: 2px 2px 0px rgba(255,255,255,0.8);
 }
-.contactList li{
+.contactList li {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
 }
-.contactLabel{
-    font-size: 11px;
-    font-weight: 700;
+.contactLabel {
+    font-size: 12px;
+    font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1px;
-    opacity: 0.5;
 }
-.footerBottom{
+.contactList span:last-child {
+    font-weight: 700;
+    font-size: 15px;
+}
+.footerBottom {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 18px 0;
-    font-size: 13px;
-    opacity: 0.65;
+    padding: 24px 0;
+    font-size: 15px;
+    font-weight: 700;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 16px;
 }
-.footerLegal{
+.footerLegal {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
 }
-.footerLegal a{
+.footerLegal a {
     color: black;
     text-decoration: none;
-    font-weight: 500;
+    transition: all 0.2s;
 }
-.footerLegal a:hover{
+.footerLegal a:hover {
     text-decoration: underline;
+    background: #000;
+    color: #F6D506;
+    padding: 0 4px;
 }
-.divider{
-    opacity: 0.4;
+.divider { font-weight: 900; }
+@media (max-width: 968px) {
+    .footerGrid { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .footerBrand { grid-column: 1 / -1; }
 }
-@media (max-width: 768px) {
-    footer{
-        padding: 32px 24px 0;
-        margin: 0 12px;
-    }
-    .footerGrid{
-        grid-template-columns: 1fr 1fr;
-        gap: 28px;
-    }
-    .footerBrand{
-        grid-column: 1 / -1;
-    }
-}
-@media (max-width: 480px) {
-    .footerGrid{
-        grid-template-columns: 1fr;
-    }
-    .footerBottom{
-        flex-direction: column;
-        text-align: center;
-    }
+@media (max-width: 600px) {
+    footer { padding: 40px 24px 0; margin: 20px 12px 0; }
+    .footerGrid { grid-template-columns: 1fr; gap: 30px; }
+    .footerBottom { flex-direction: column; text-align: center; }
 }
 </style>
