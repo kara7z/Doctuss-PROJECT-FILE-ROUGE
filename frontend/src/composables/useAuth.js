@@ -1,0 +1,51 @@
+import { ref } from 'vue'
+import { api } from '@/config/api'
+
+const user    = ref(null)
+const loading = ref(false)
+const ready   = ref(false)
+
+let fetchPromise = null
+
+const fetchUser = async () => {
+  if (ready.value) return
+  if (fetchPromise) return fetchPromise
+
+  fetchPromise = (async () => {
+    loading.value = true
+    try {
+      const res = await api('/me')
+      if (res.ok) {
+        const data = await res.json()
+        user.value = data.user
+      } else {
+        user.value = null
+      }
+    } catch {
+      user.value = null
+    } finally {
+      loading.value = false
+      ready.value   = true
+      fetchPromise  = null
+    }
+  })()
+
+  return fetchPromise
+}
+
+const logout = async () => {
+  try {
+    await api('/logout', { method: 'POST' })
+  } finally {
+    user.value = null
+    window.location.href = '/'
+  }
+}
+
+export const useAuth = () => ({
+  user,
+  loading,
+  ready,
+  fetchUser,
+  logout,
+})
