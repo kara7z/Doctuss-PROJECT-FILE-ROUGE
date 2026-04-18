@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Validation\ValidationException;
 use App\Enums\AppointmentStatus;
+use App\Models\DoctorWorkingDate;
 use Carbon\Carbon;
 
 class DoctorProfile extends Model
@@ -24,8 +25,7 @@ class DoctorProfile extends Model
         'phone_number',
         'profile_picture',
         'banner_picture',
-        'hospital_lat',
-        'hospital_lng',
+        'location_link',
         'bio',
         'is_verified',
     ];
@@ -35,8 +35,6 @@ class DoctorProfile extends Model
         return [
             'is_verified'           => 'boolean',
             'experience_start_date' => 'date',
-            'hospital_lat'          => 'float',
-            'hospital_lng'          => 'float',
         ];
     }
 
@@ -75,6 +73,11 @@ class DoctorProfile extends Model
         return $this->hasMany(Schedule::class, 'doctor_profile_id');
     }
 
+    public function workingDates(): HasMany
+    {
+        return $this->hasMany(DoctorWorkingDate::class, 'doctor_profile_id');
+    }
+
     public function verificationRequests(): HasMany
     {
         return $this->hasMany(VerificationRequest::class);
@@ -88,19 +91,30 @@ class DoctorProfile extends Model
     public function getCurrentStatusAttribute(): string
     {
         $now = now();
-        $todayIndex = $now->dayOfWeek; 
-        $todaysSchedules = $this->schedules->where('day_of_week', $todayIndex);
-
-        if ($todaysSchedules->isEmpty()) {
-            return 'Offline';
-        }
-
+        $todayStr = $now->toDateString();
         $currentTime = $now->format('H:i:s');
         $isDuringShift = false;
-        foreach ($todaysSchedules as $schedule) {
-            if ($currentTime >= $schedule->start_time && $currentTime <= $schedule->end_time) {
-                $isDuringShift = true;
-                break;
+
+        // First, check explicit working_dates for today
+        if ($this->relationLoaded('workingDates')) {
+            $todayWorkingDate = $this->workingDates
+                ->first(fn($wd) => $wd->working_date->toDateString() === $todayStr);
+
+            if ($todayWorkingDate) {
+                $isDuringShift = $currentTime >= $todayWorkingDate->start_time
+                    && $currentTime <= $todayWorkingDate->end_time;
+            }
+        }
+
+        // Fallback to recurring schedules
+        if (!$isDuringShift && $this->relationLoaded('schedules')) {
+            $todayIndex = $now->dayOfWeek;
+            $todaysSchedules = $this->schedules->where('day_of_week', $todayIndex);
+            foreach ($todaysSchedules as $schedule) {
+                if ($currentTime >= $schedule->start_time && $currentTime <= $schedule->end_time) {
+                    $isDuringShift = true;
+                    break;
+                }
             }
         }
 
