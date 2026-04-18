@@ -17,7 +17,7 @@ class AppointmentController extends Controller
         $this->authorize('viewAny', Appointment::class);
 
         $query = Appointment::query()
-            ->with(['client:id,name,email', 'doctorProfile.user:id,name,email']);
+            ->with(['client:id,name,email', 'doctorProfile.user:id,name,email', 'review']);
 
         $user = $request->user();
         if ($user->isClient()) {
@@ -39,6 +39,29 @@ class AppointmentController extends Controller
             'proposed_at' => ['nullable', 'date'],
             'status' => ['nullable', 'in:' . implode(',', AppointmentStatus::values())],
         ]);
+
+        $preferredAt = \Carbon\Carbon::parse($data['preferred_at']);
+        $conflict = Appointment::query()
+            ->where('doctor_profile_id', $data['doctor_profile_id'])
+            ->where(function ($query) use ($preferredAt) {
+                $query->where('preferred_at', $preferredAt)
+                      ->orWhere('proposed_at', $preferredAt);
+            })
+            ->where(function ($query) {
+                $query->where('status', AppointmentStatus::APPROVED)
+                      ->orWhere(function ($q2) {
+                          $q2->where('status', AppointmentStatus::PENDING)
+                             ->where('client_id', auth()->id());
+                      });
+            })
+            ->exists();
+
+        if ($conflict) {
+            return response()->json([
+                'message' => 'This time slot is already booked.',
+                'errors' => ['preferred_at' => ['This time slot is already booked by you or is already approved.']]
+            ], 422);
+        }
 
         $appointment = Appointment::query()->create([
             'client_id' => $request->user()->id,

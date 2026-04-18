@@ -27,14 +27,17 @@ class VerificationRequestController extends Controller
         }
 
         $data = $request->validate([
-            'document_path' => ['required', 'string', 'max:2048'],
+            'document' => ['required', 'image', 'max:5120'], // 5MB max
         ]);
+
+        // Store the uploaded file
+        $path = $data['document']->store('verification-documents', 'public');
 
         $verificationRequest = VerificationRequest::query()->create([
             'doctor_profile_id' => $user->doctorProfile->id,
             'proposed_at' => now(),
             'status' => RequestStatus::PENDING,
-            'document_path' => $data['document_path'],
+            'document_path' => $path,
         ]);
 
         return response()->json([

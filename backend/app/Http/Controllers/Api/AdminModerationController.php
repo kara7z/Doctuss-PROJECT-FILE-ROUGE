@@ -12,6 +12,45 @@ use Illuminate\Http\Request;
 
 class AdminModerationController extends Controller
 {
+    public function getUsers(Request $request): JsonResponse
+    {
+        $query = User::query()->with(['doctorProfile.specialty.category']);
+
+        if ($request->has('role') && in_array($request->input('role'), ['client', 'doctor', 'admin'])) {
+            $query->where('role', $request->input('role'));
+        }
+
+        $users = $query->orderBy('created_at', 'desc')->get();
+
+        return response()->json([
+            'data' => $users->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'status' => $user->status->value,
+                    'gender' => $user->gender?->value,
+                    'birthday' => $user->birthday,
+                    'created_at' => $user->created_at,
+                    'doctor_profile' => $user->doctorProfile ? [
+                        'id' => $user->doctorProfile->id,
+                        'is_verified' => $user->doctorProfile->is_verified,
+                        'phone_number' => $user->doctorProfile->phone_number,
+                        'city' => $user->doctorProfile->city,
+                        'specialty' => $user->doctorProfile->specialty ? [
+                            'id' => $user->doctorProfile->specialty->id,
+                            'name' => $user->doctorProfile->specialty->name,
+                            'category' => $user->doctorProfile->specialty->category ? [
+                                'id' => $user->doctorProfile->specialty->category->id,
+                                'name' => $user->doctorProfile->specialty->category->name,
+                            ] : null,
+                        ] : null,
+                    ] : null,
+                ];
+            }),
+        ]);
+    }
     public function suspendUser(Request $request, User $user): JsonResponse
     {
         if ($request->user()->is($user)) {
