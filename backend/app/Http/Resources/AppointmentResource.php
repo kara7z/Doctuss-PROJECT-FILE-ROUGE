@@ -16,8 +16,8 @@ class AppointmentResource extends JsonResource
             'id' => $this->id,
             'client_id' => $this->client_id,
             'doctor_profile_id' => $this->doctor_profile_id,
-            'preferred_at' => $this->preferred_at,
-            'proposed_at' => $this->proposed_at,
+            'preferred_at' => $this->preferred_at?->format('Y-m-d H:i:s'),
+            'proposed_at' => $this->proposed_at?->format('Y-m-d H:i:s'),
             'status' => $this->status?->value ?? $this->status,
             'client' => $this->whenLoaded('client', function () {
                 return [
@@ -26,11 +26,15 @@ class AppointmentResource extends JsonResource
                     'email' => $this->client->email,
                 ];
             }),
-            'doctor' => $doctorUser ? [
+            'doctor_profile' => $doctorProfile ? [
+                'id' => $doctorProfile->id,
+                'user' => $doctorUser ? [
                     'id' => $doctorUser->id,
                     'name' => $doctorUser->name,
                     'email' => $doctorUser->email,
+                ] : null,
             ] : null,
+            'review' => $this->whenLoaded('review'),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
