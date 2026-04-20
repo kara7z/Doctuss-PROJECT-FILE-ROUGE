@@ -1,7 +1,11 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+const router = useRouter()
 
 const isMenuOpen = ref(false)
 const route = useRoute()
@@ -20,6 +24,29 @@ const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
 
+const scrollToContact = () => {
+  if (route.path !== '/') {
+    router.push('/')
+    setTimeout(() => {
+      const contactSection = document.querySelector('.contactSection')
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 300)
+  } else {
+    const contactSection = document.querySelector('.contactSection')
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+  isMenuOpen.value = false
+}
+
+const goToSearch = () => {
+  router.push('/search')
+  isMenuOpen.value = false
+}
+
 const pageName = computed(() => {
   const name = route.name
   if (!name) return 'home'
@@ -32,16 +59,20 @@ const avatarLetter = computed(() => user.value?.name?.[0]?.toUpperCase() ?? '?')
 
 <template>
   <nav class="nav">
-    <router-link to="/">doctuss</router-link>
+    <router-link to="/">{{ t('nav.brand') }}</router-link>
 
     <ul class="nav-links" :class="{ active: isMenuOpen }">
       <li class="dropdown">
         <span class="navCurrentPage">{{ pageName }}</span>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" class="dropdownChevron" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         <ul class="dropdown-menu">
-          <li><router-link to="/about">About</router-link></li>
-          <li><router-link to="/services">Services</router-link></li>
-          <li><router-link to="/contact">Contact</router-link></li>
+          <li><router-link to="/">{{ t('nav.pages.home') }}</router-link></li>
+          <li><a @click="goToSearch" style="cursor: pointer;">{{ t('nav.pages.services') }}</a></li>
+          <li><a @click="scrollToContact" style="cursor: pointer;">{{ t('nav.pages.contact') }}</a></li>
+          <li v-if="user && user.role === 'client'"><router-link to="/appointments">{{ t('nav.pages.appointments') }}</router-link></li>
+          <li v-if="user && user.role === 'doctor'"><router-link to="/doctor-dashboard">{{ t('nav.pages.dashboard') }}</router-link></li>
+          <li v-if="user && user.role === 'doctor'"><router-link to="/my-profile">{{ t('nav.pages.myProfile') }}</router-link></li>
+          <li v-if="user && user.role === 'admin'"><router-link to="/admin/dashboard">{{ t('nav.pages.dashboard') }}</router-link></li>
         </ul>
       </li>
 
@@ -51,7 +82,7 @@ const avatarLetter = computed(() => user.value?.name?.[0]?.toUpperCase() ?? '?')
           {{ fullName }}
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
-        <router-link v-else to="/login">login</router-link>
+        <router-link v-else to="/login">{{ t('nav.login') }}</router-link>
       </li>
     </ul>
 
@@ -65,7 +96,7 @@ const avatarLetter = computed(() => user.value?.name?.[0]?.toUpperCase() ?? '?')
         </button>
       </div>
     </template>
-    <router-link v-else to="/login" class="desktop-login navAuthBtn">login</router-link>
+    <router-link v-else to="/login" class="desktop-login navAuthBtn">{{ t('nav.login') }}</router-link>
 
     <button class="burger" @click="toggleMenu" :class="{ active: isMenuOpen }">
       <span></span>

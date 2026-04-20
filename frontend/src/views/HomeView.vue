@@ -18,6 +18,6 @@ import ContactUsSection from '@/components/home/ContactUsSection.vue'
   </div>
 </template>
 
-<style>
+<style scoped>
 
 </style>

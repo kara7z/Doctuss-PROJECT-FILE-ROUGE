@@ -1,19 +1,22 @@
 <script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+const marqueeItems = computed(() => [
+  t('marquee.items[0]'),
+  t('marquee.items[1]'),
+  t('marquee.items[2]'),
+  t('marquee.items[3]'),
+  t('marquee.items[4]')
+])
 </script>
 
 <template>
   <div class="marqueeWrap">
     <div class="marqueeContent">
-      <span class="marqueeItem">⚕️ 24/7 ONLINE BOOKING</span>
-      <span class="marqueeItem">⚕️ VERIFIED SPECIALISTS</span>
-      <span class="marqueeItem">⚕️ INSTANT CONSULTATIONS</span>
-      <span class="marqueeItem">⚕️ TOP RATED EXPERTS</span>
-      <span class="marqueeItem">⚕️ SECURE PATIENT DATA</span>
-      <span class="marqueeItem">⚕️ 24/7 ONLINE BOOKING</span>
-      <span class="marqueeItem">⚕️ VERIFIED SPECIALISTS</span>
-      <span class="marqueeItem">⚕️ INSTANT CONSULTATIONS</span>
-      <span class="marqueeItem">⚕️ TOP RATED EXPERTS</span>
-      <span class="marqueeItem">⚕️ SECURE PATIENT DATA</span>
+      <span class="marqueeItem" v-for="(item, index) in [...marqueeItems, ...marqueeItems]" :key="index">⚕️ {{ item }}</span>
     </div>
   </div>
 </template>

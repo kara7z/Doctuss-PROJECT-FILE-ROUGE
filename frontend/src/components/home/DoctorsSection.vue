@@ -1,24 +1,26 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { api } from '@/config/api'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const activeTab = ref('rated')
 const doctorsScrollRef = ref(null)
 
 const tabs = [
   {
     key: 'rated',
-    label: 'Most Rated',
+    label: computed(() => t('doctors.tabs.mostRated')),
     svg: '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
   },
   {
     key: 'experience',
-    label: 'Higher Years of Experience',
+    label: computed(() => t('doctors.tabs.experience')),
     svg: '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>',
   },
   {
     key: 'popular',
-    label: 'Popular Categories',
+    label: computed(() => t('doctors.tabs.popular')),
     svg: '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
   },
 ]
@@ -55,12 +57,15 @@ const fetchDoctors = async () => {
           initials: d.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase(),
           profilePicture: dp.profile_picture,
           specialty: spec.name || 'Specialist',
+          specialtyId: spec.id,
           rating: dp.avg_rating ? parseFloat(dp.avg_rating).toFixed(1) : 0,
           experience: exp,
           reviewsCount: dp.reviews_count || 0,
-          status: dp.current_status || 'Offline',
+          status: dp.current_status || 'Unavailable',
+          city: dp.city || 'Unknown',
           avatarGradient: `linear-gradient(135deg, ${c1}, ${c2})`,
-          category: spec.category?.name || 'General'
+          category: spec.category?.name || 'General',
+          categoryId: spec.category?.id
         }
       })
     }
@@ -131,10 +136,10 @@ const scrollDoctors = (dir) => {
       </button>
 
       <div class="doctorsScroll" ref="doctorsScrollRef">
-        <div class="doctorCard" v-for="doctor in filteredDoctors" :key="doctor.id">
+        <div class="doctorCard" v-for="doctor in filteredDoctors" :key="doctor.id" @click="$router.push(`/doctor/${doctor.id}`)"  role="button" :aria-label="`View profile of ${doctor.name}`">
           <!-- Status badge -->
           <span class="doctorStatusBadge" :class="'status-' + doctor.status">
-            {{ doctor.status }}
+            {{ t('search.status.' + doctor.status.toLowerCase()) }}
           </span>
 
           <!-- Avatar -->
@@ -149,24 +154,30 @@ const scrollDoctors = (dir) => {
           <!-- Info -->
           <div class="doctorInfo">
             <h4 class="doctorName">{{ doctor.name }}</h4>
-            <span class="doctorSpecialty">{{ doctor.specialty }}</span>
+            <span class="doctorSpecialty">{{ doctor.specialtyId ? t(`specialties.${doctor.specialtyId}`) : doctor.specialty }}</span>
 
             <div class="doctorMeta">
               <span class="doctorRating">
                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="#F6D506" stroke="#F6D506" stroke-width="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 {{ doctor.rating }}
               </span>
-              <span class="doctorExp">{{ doctor.experience }} yrs exp</span>
+              <span class="doctorExp">{{ doctor.experience }} {{ t('doctors.yearsExp') }}</span>
             </div>
 
-            <div class="doctorPatients">
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-              {{ doctor.reviewsCount }} {{ doctor.reviewsCount === 1 ? 'review' : 'reviews' }}
+            <div class="doctorMetrics">
+              <div class="doctorMetric">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                <span>{{ doctor.city }}</span>
+              </div>
+              <div class="doctorMetric">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                <span>{{ doctor.reviewsCount }} {{ doctor.reviewsCount === 1 ? t('doctors.review') : t('doctors.reviews') }}</span>
+              </div>
             </div>
           </div>
 
           <!-- Action -->
-          <button class="doctorBookBtn">Book Appointment</button>
+          <button class="doctorBookBtn" @click.stop="$router.push(`/doctor/${doctor.id}`)">{{ t('doctors.bookAppointment') }}</button>
         </div>
       </div>
 
@@ -181,8 +192,8 @@ const scrollDoctors = (dir) => {
         <circle cx="12" cy="12" r="10"></circle>
         <line x1="8" y1="12" x2="16" y2="12"></line>
       </svg>
-      <h3>No doctors found</h3>
-      <p>We couldn't find any specialists matching this criteria.<br/>Please check back later or try a different filter.</p>
+      <h3>{{ t('doctors.noResults') }}</h3>
+      <p>{{ t('doctors.noResultsDesc') }}</p>
     </div>
   </section>
 </template>
@@ -289,6 +300,7 @@ const scrollDoctors = (dir) => {
 }
 .status-Available { background: #4caf50; color: #fff; }
 .status-Busy { background: #ff9800; color: #000; }
+.status-Unavailable { background: #9e9e9e; color: #000; }
 .status-Offline { background: #9e9e9e; color: #000; }
 
 /* Avatar */
@@ -314,7 +326,8 @@ const scrollDoctors = (dir) => {
 .doctorMeta { display: flex; align-items: center; gap: 16px; margin-top: 6px; }
 .doctorRating { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 900; color: #000; }
 .doctorExp { font-size: 13px; color: #000; font-weight: 800; }
-.doctorPatients { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #000; font-weight: 800; margin-top: 4px; }
+.doctorMetrics { display: flex; align-items: center; gap: 16px; margin-top: 4px; flex-wrap: wrap; justify-content: center; }
+.doctorMetric { display: flex; align-items: center; gap: 4px; font-size: 13px; color: #000; font-weight: 800; }
 
 /* Book button */
 .doctorBookBtn {

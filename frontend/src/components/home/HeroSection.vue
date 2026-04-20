@@ -1,41 +1,20 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
-const messages = [
-  'Connect with trusted healthcare professionals near you',
-  'Your health journey starts with finding the right doctor',
-  'Discover experienced doctors and specialists in your area',
-  'Book appointments with top-rated healthcare providers',
-  'Find the perfect doctor for you and your family',
-  'Access quality healthcare from certified medical professionals',
-  'Search thousands of doctors across all specialties',
-  'Get connected to the best medical care in your community',
-  'Expert medical care is just a search away',
-  'Find doctors who accept your insurance and fit your schedule',
-  'Trusted healthcare professionals ready to serve you',
-  'Your wellness matters - find the right doctor today',
-  'Connecting patients with compassionate healthcare providers',
-  'Quality medical care tailored to your needs',
-  'Browse verified doctors and read real patient reviews',
-  'Schedule appointments with specialists near you instantly',
-  'Find doctors by specialty, location, or availability',
-  'Healthcare made simple - search, compare, and book',
-  'Meet doctors who truly care about your health',
-  'From routine checkups to specialized care, we connect you',
-  'Discover healthcare providers who speak your language',
-  'Find pediatricians, dentists, therapists, and more',
-  'Your trusted partner in finding quality medical care',
-  'Compare doctors, read reviews, and make informed choices',
-  'Access telehealth and in-person appointments easily',
-  'Find doctors accepting new patients in your area',
-  'Expert care for every stage of your life',
-  'Connect with doctors who understand your unique needs',
-  'Quality healthcare starts with the right provider',
-  'Search by symptoms, conditions, or medical specialties'
-]
+const { t } = useI18n()
 
 const currentMessage = ref('')
 const searchInput = ref(null)
+const searchQuery = ref('')
+const router = useRouter()
+
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    router.push({ path: '/search', query: { q: searchQuery.value.trim() } })
+  }
+}
 
 const handleSlash = (e) => {
   if (e.key === '/' && document.activeElement !== searchInput.value) {
@@ -45,6 +24,18 @@ const handleSlash = (e) => {
 }
 
 onMounted(() => {
+  const messages = [
+    t('hero.messages[0]'), t('hero.messages[1]'), t('hero.messages[2]'),
+    t('hero.messages[3]'), t('hero.messages[4]'), t('hero.messages[5]'),
+    t('hero.messages[6]'), t('hero.messages[7]'), t('hero.messages[8]'),
+    t('hero.messages[9]'), t('hero.messages[10]'), t('hero.messages[11]'),
+    t('hero.messages[12]'), t('hero.messages[13]'), t('hero.messages[14]'),
+    t('hero.messages[15]'), t('hero.messages[16]'), t('hero.messages[17]'),
+    t('hero.messages[18]'), t('hero.messages[19]'), t('hero.messages[20]'),
+    t('hero.messages[21]'), t('hero.messages[22]'), t('hero.messages[23]'),
+    t('hero.messages[24]'), t('hero.messages[25]'), t('hero.messages[26]'),
+    t('hero.messages[27]'), t('hero.messages[28]'), t('hero.messages[29]')
+  ]
   const randomIndex = Math.floor(Math.random() * messages.length)
   currentMessage.value = messages[randomIndex]
   window.addEventListener('keydown', handleSlash)
@@ -61,21 +52,21 @@ onUnmounted(() => {
     <div class="heroContent">
       <div class="titleWrapper">
         <h1>
-          <span class="word" v-for="(word, index) in ['Find', 'Your', 'Doctor']" :key="index" :style="{animationDelay: `${index * 0.1}s`}">
+          <span class="word" v-for="(word, index) in [t('hero.title.find'), t('hero.title.your'), t('hero.title.doctor')]" :key="index" :style="{animationDelay: `${index * 0.1}s`}">
             {{ word }}
           </span>
         </h1>
       </div>
       <p class="subtitle">{{ currentMessage }}</p>
-      <div class="searchBar">
-        <input ref="searchInput" type="text" placeholder="Search for doctors, specialties, or conditions..." />
-        <button>
+      <form class="searchBar" @submit.prevent="handleSearch">
+        <input ref="searchInput" v-model="searchQuery" type="text" :placeholder="t('hero.searchPlaceholder')" />
+        <button type="submit">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <path d="m21 21-4.35-4.35"></path>
           </svg>
         </button>
-      </div>
+      </form>
     </div>
   </section>
 </template>

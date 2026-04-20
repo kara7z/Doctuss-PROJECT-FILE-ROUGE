@@ -1,10 +1,16 @@
+<script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+</script>
+
 <template>
 <section class="DiscoverSectionContainer">
   <div class="Discover-Text">
     <span>
-      Discover the <h1>online</h1> appointment!
+      {{ t('discover.title') }} <h1>{{ t('discover.online') }}</h1> {{ t('discover.appointment') }}
     </span>
-    <p>Find and book appointments with trusted doctors near you. Browse by specialty, read patient reviews, and get the care you need — all in one place.</p>
+    <p>{{ t('discover.description') }}</p>
   </div>
 
   <div class="stepsSection">
@@ -13,12 +19,11 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       </div>
       <span class="stepNumber">01</span>
-      <h3>Find a Doctor</h3>
-      <p>Search by specialty, location, or name to find the right doctor for your needs.</p>
+      <h3>{{ t('discover.steps.step1.title') }}</h3>
+      <p>{{ t('discover.steps.step1.description') }}</p>
     </div>
     
     <div class="stepDivider">
-      <!-- Huge graphical block arrow -->
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,40 L60,40 L60,20 L100,50 L60,80 L60,60 L0,60 Z" fill="#000"/></svg>
     </div>
     
@@ -27,8 +32,8 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
       <span class="stepNumber">02</span>
-      <h3>View Profile</h3>
-      <p>Read reviews, check qualifications, and explore availability before deciding.</p>
+      <h3>{{ t('discover.steps.step2.title') }}</h3>
+      <p>{{ t('discover.steps.step2.description') }}</p>
     </div>
     
     <div class="stepDivider">
@@ -40,8 +45,8 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       </div>
       <span class="stepNumber">03</span>
-      <h3>Book a Visit</h3>
-      <p>Pick a time that works for you and confirm your appointment in seconds.</p>
+      <h3>{{ t('discover.steps.step3.title') }}</h3>
+      <p>{{ t('discover.steps.step3.description') }}</p>
     </div>
   </div>
 </section>

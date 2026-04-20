@@ -1,9 +1,52 @@
- <template>
+<script setup>
+import { useI18n } from 'vue-i18n'
+import { useRouter, useRoute } from 'vue-router'
+import { watch } from 'vue'
+
+const { t, locale } = useI18n()
+const router = useRouter()
+const route = useRoute()
+
+const changeLanguage = (lang) => {
+  locale.value = lang
+  localStorage.setItem('locale', lang)
+  document.documentElement.setAttribute('lang', lang)
+  document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr')
+}
+
+const scrollToContact = () => {
+  if (route.path !== '/') {
+    router.push('/')
+    setTimeout(() => {
+      const contactSection = document.querySelector('.contactSection')
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 300)
+  } else {
+    const contactSection = document.querySelector('.contactSection')
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+}
+
+const goToSearch = () => {
+  router.push('/search')
+}
+
+watch(locale, (newLocale) => {
+  document.documentElement.setAttribute('lang', newLocale)
+  document.documentElement.setAttribute('dir', newLocale === 'ar' ? 'rtl' : 'ltr')
+}, { immediate: true })
+</script>
+
+<template>
     <footer>
         <div class="footerGrid">
             <div class="footerBrand">
-                <span class="footerLogo">doctuss</span>
-                <p>Connecting patients with trusted healthcare professionals. Quality care starts with finding the right doctor.</p>
+                <span class="footerLogo">{{ t('footer.brand') }}</span>
+                <p>{{ t('footer.description') }}</p>
                 <div class="footerSocials">
                     <a href="#" aria-label="Twitter">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -17,48 +60,57 @@
                 </div>
             </div>
             <div class="footerCol">
-                <h4>Company</h4>
+                <h4>{{ t('footer.company') }}</h4>
                 <ul>
-                    <li><router-link to="/">Home</router-link></li>
-                    <li><router-link to="/about">About Us</router-link></li>
-                    <li><router-link to="/services">Services</router-link></li>
-                    <li><router-link to="/contact">Contact</router-link></li>
+                    <li><router-link to="/">{{ t('footer.links.home') }}</router-link></li>
+                    <li><a @click="goToSearch" style="cursor: pointer;">{{ t('footer.links.services') }}</a></li>
+                    <li><a @click="scrollToContact" style="cursor: pointer;">{{ t('footer.links.contact') }}</a></li>
                 </ul>
             </div>
             <div class="footerCol">
-                <h4>Patients</h4>
+                <h4>{{ t('footer.patients') }}</h4>
                 <ul>
-                    <li><router-link to="/login">Sign In</router-link></li>
-                    <li><router-link to="/register">Create Account</router-link></li>
-                    <li><a href="#">Find a Doctor</a></li>
-                    <li><a href="#">Book Appointment</a></li>
-                    <li><a href="#">Patient Support</a></li>
+                    <li><router-link to="/login">{{ t('footer.links.signIn') }}</router-link></li>
+                    <li><router-link to="/register">{{ t('footer.links.createAccount') }}</router-link></li>
+                    <li><a @click="goToSearch" style="cursor: pointer;">{{ t('footer.links.findDoctor') }}</a></li>
+                    <li><a @click="goToSearch" style="cursor: pointer;">{{ t('footer.links.bookAppointment') }}</a></li>
+                    <li><a @click="scrollToContact" style="cursor: pointer;">{{ t('footer.links.patientSupport') }}</a></li>
                 </ul>
             </div>
             <div class="footerCol">
-                <h4>Get in Touch</h4>
+                <h4>{{ t('footer.getInTouch') }}</h4>
                 <ul class="contactList">
                     <li>
-                        <span class="contactLabel">Email</span>
+                        <span class="contactLabel">{{ t('footer.email') }}</span>
                         <span>support@doctuss.com</span>
                     </li>
                     <li>
-                        <span class="contactLabel">Phone</span>
+                        <span class="contactLabel">{{ t('footer.phone') }}</span>
                         <span>+1 (800) 000-0000</span>
                     </li>
                     <li>
-                        <span class="contactLabel">Address</span>
-                        <span>Rabat, Morocco</span>
+                        <span class="contactLabel">{{ t('footer.address') }}</span>
+                        <span>{{ t('footer.location') }}</span>
                     </li>
                 </ul>
             </div>
         </div>
         <div class="footerBottom">
-            <span>© {{ new Date().getFullYear() }} Doctuss. All rights reserved.</span>
-            <div class="footerLegal">
-                <a href="#">Privacy Policy</a>
-                <span class="divider">|</span>
-                <a href="#">Terms of Service</a>
+            <span>© {{ new Date().getFullYear() }} {{ t('footer.copyright') }}</span>
+            <div class="footerActions">
+                <div class="footerLegal">
+                    <a href="#">{{ t('footer.privacyPolicy') }}</a>
+                    <span class="divider">|</span>
+                    <a href="#">{{ t('footer.termsOfService') }}</a>
+                </div>
+                <div class="languageSelector">
+                    <label for="language">{{ t('footer.language') }}:</label>
+                    <select id="language" v-model="locale" @change="changeLanguage(locale)" class="langSelect">
+                        <option value="en">English</option>
+                        <option value="fr">Français</option>
+                        <option value="ar">العربية</option>
+                    </select>
+                </div>
             </div>
         </div>
     </footer>
@@ -189,6 +241,40 @@ footer {
     padding: 0 4px;
 }
 .divider { font-weight: 900; }
+.footerActions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+.languageSelector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+}
+.langSelect {
+    padding: 6px 12px;
+    border: 3px solid #000;
+    background: #fff;
+    color: #000;
+    font-weight: 900;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 3px 3px 0px #000;
+}
+.langSelect:hover {
+    background: #000;
+    color: #F6D506;
+    transform: translate(-2px, -2px);
+    box-shadow: 5px 5px 0px #000;
+}
+.langSelect:focus {
+    outline: none;
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0px #000;
+}
 @media (max-width: 968px) {
     .footerGrid { grid-template-columns: 1fr 1fr; gap: 40px; }
     .footerBrand { grid-column: 1 / -1; }
@@ -197,5 +283,6 @@ footer {
     footer { padding: 40px 24px 0; margin: 20px 12px 0; }
     .footerGrid { grid-template-columns: 1fr; gap: 30px; }
     .footerBottom { flex-direction: column; text-align: center; }
+    .footerActions { flex-direction: column; gap: 16px; }
 }
 </style>
