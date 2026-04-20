@@ -18,8 +18,7 @@ return new class extends Migration
             $table->string('phone_number')->nullable();
             $table->string('profile_picture')->nullable();
             $table->string('banner_picture')->nullable();
-            $table->decimal('hospital_lat', 10, 7)->nullable();
-            $table->decimal('hospital_lng', 10, 7)->nullable();
+            $table->string('location_link')->nullable();
             $table->text('bio')->nullable();
             $table->boolean('is_verified')->default(false);
             $table->decimal('avg_rating', 3, 2)->default(0);

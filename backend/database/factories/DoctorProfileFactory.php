@@ -19,15 +19,14 @@ class DoctorProfileFactory extends Factory
             
             'experience_start_date' => fake()->dateTimeBetween('-30 years', '-1 year'),
             'hospital_name' => fake()->company() . ' Hospital',
-            'city' => fake()->city(),
+            'city' => fake()->randomElement(['Casablanca', 'Rabat', 'Marrakech', 'Fes', 'Tangier', 'Agadir', 'Meknes', 'Oujda', 'Kenitra', 'Tetouan']),
             'phone_number' => fake()->phoneNumber(),
             
     
             'profile_picture' => 'https://randomuser.me/api/portraits/' . fake()->randomElement(['men', 'women']) . '/' . fake()->numberBetween(1, 99) . '.jpg',
             'banner_picture' => fake()->imageUrl(1200, 400, 'medical', true),
             
-            'hospital_lat' => fake()->latitude(),
-            'hospital_lng' => fake()->longitude(),
+            'location_link' => fake()->boolean(70) ? 'https://maps.google.com/?q=' . fake()->latitude() . ',' . fake()->longitude() : null,
             'bio' => fake()->paragraphs(2, true),
             'is_verified' => true,
         ];
