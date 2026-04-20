@@ -102,7 +102,7 @@ class DoctorProfile extends Model
 
             if ($todayWorkingDate) {
                 $isDuringShift = $currentTime >= $todayWorkingDate->start_time
-                    && $currentTime <= $todayWorkingDate->end_time;
+                    && $currentTime < $todayWorkingDate->end_time;
             }
         }
 
@@ -111,7 +111,7 @@ class DoctorProfile extends Model
             $todayIndex = $now->dayOfWeek;
             $todaysSchedules = $this->schedules->where('day_of_week', $todayIndex);
             foreach ($todaysSchedules as $schedule) {
-                if ($currentTime >= $schedule->start_time && $currentTime <= $schedule->end_time) {
+                if ($currentTime >= $schedule->start_time && $currentTime < $schedule->end_time) {
                     $isDuringShift = true;
                     break;
                 }
@@ -119,7 +119,7 @@ class DoctorProfile extends Model
         }
 
         if (!$isDuringShift) {
-            return 'Offline';
+            return 'Unavailable';
         }
 
         // Must eager load appointments!

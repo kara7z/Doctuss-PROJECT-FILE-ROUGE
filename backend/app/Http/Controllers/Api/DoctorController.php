@@ -75,12 +75,66 @@ class DoctorController extends Controller
             }
         }
 
+        if ($request->has('status') && in_array($request->input('status'), ['Available', 'Busy', 'Unavailable'])) {
+            $status = $request->input('status');
+            $now = now();
+            $todayStr = $now->toDateString();
+            $currentTime = $now->format('H:i:s');
+            $todayIndex = $now->dayOfWeek;
+
+            if ($status === 'Unavailable') {
+                $query->whereHas('doctorProfile', function ($dp) use ($todayStr, $currentTime, $todayIndex) {
+                    $dp->whereDoesntHave('workingDates', function ($wd) use ($todayStr, $currentTime) {
+                        $wd->whereDate('working_date', $todayStr)
+                           ->where('start_time', '<=', $currentTime)
+                           ->where('end_time', '>', $currentTime);
+                    })->whereDoesntHave('schedules', function ($s) use ($todayIndex, $currentTime) {
+                        $s->where('day_of_week', $todayIndex)
+                          ->where('start_time', '<=', $currentTime)
+                          ->where('end_time', '>', $currentTime);
+                    });
+                });
+            } else {
+                $query->whereHas('doctorProfile', function ($dp) use ($todayStr, $currentTime, $todayIndex, $now, $status) {
+                    $dp->where(function ($q) use ($todayStr, $currentTime, $todayIndex) {
+                        $q->whereHas('workingDates', function ($wd) use ($todayStr, $currentTime) {
+                            $wd->whereDate('working_date', $todayStr)
+                               ->where('start_time', '<=', $currentTime)
+                               ->where('end_time', '>', $currentTime);
+                        })->orWhereHas('schedules', function ($s) use ($todayIndex, $currentTime) {
+                            $s->where('day_of_week', $todayIndex)
+                              ->where('start_time', '<=', $currentTime)
+                              ->where('end_time', '>', $currentTime);
+                        });
+                    });
+
+                    if ($status === 'Available') {
+                        $dp->whereDoesntHave('appointments', function ($appt) use ($now) {
+                            $appt->where('status', 'approved')
+                                 ->whereNotNull('proposed_at')
+                                 ->where('proposed_at', '<=', $now)
+                                 ->where('proposed_at', '>=', $now->copy()->subHour());
+                        });
+                    } elseif ($status === 'Busy') {
+                        $dp->whereHas('appointments', function ($appt) use ($now) {
+                            $appt->where('status', 'approved')
+                                 ->whereNotNull('proposed_at')
+                                 ->where('proposed_at', '<=', $now)
+                                 ->where('proposed_at', '>=', $now->copy()->subHour());
+                        });
+                    }
+                });
+            }
+        }
+
+        $perPage = $request->input('per_page', 9);
+        
         $doctors = $query->with(['doctorProfile' => function ($query) {
             $query->withCount('reviews')
-                  ->with(['specialty.category', 'schedules', 'appointments' => function($q) {
+                  ->with(['specialty.category', 'schedules', 'reviews.user', 'appointments' => function($q) {
                       $q->whereIn('status', ['approved', 'pending']);
                   }]);
-        }])->paginate(9);
+        }])->paginate($perPage);
 
         return DoctorResource::collection($doctors);
     }
