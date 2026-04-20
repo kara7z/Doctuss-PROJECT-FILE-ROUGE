@@ -1,6 +1,9 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue'
 import { api } from '@/config/api'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const error = ref('')
 const success = ref(false)
@@ -12,7 +15,7 @@ const specialties = ref([])
 
 const cities = [
   'Casablanca', 'Rabat', 'Marrakech', 'Fes', 'Tangier',
-  'Agadir', 'Meknes', 'Oujda', 'Kenitra', 'Tetouan', 'Other'
+  'Agadir', 'Meknes', 'Oujda', 'Kenitra', 'Tetouan'
 ]
 
 const formData = ref({
@@ -108,66 +111,62 @@ const register = async (e) => {
   <div class="registerPage">
     <div class="registerCard" :class="{ shake: shaking }">
 
-      <router-link to="/" class="logo">doctuss</router-link>
+      <router-link to="/" class="logo">{{ t('nav.brand') }}</router-link>
 
       <div class="cardHeader">
-        <h1 class="cardTitle">Create account</h1>
-        <p class="cardSub">Join Doctuss and find your doctor</p>
+        <h1 class="cardTitle">{{ t('register.createAccount') }}</h1>
+        <p class="cardSub">{{ t('register.joinDoctuss') }}</p>
       </div>
 
       <Transition name="slide">
         <p v-if="error" class="alertError">{{ error }}</p>
       </Transition>
       <Transition name="slide">
-        <p v-if="success" class="alertSuccess">Account created! Redirecting…</p>
+        <p v-if="success" class="alertSuccess">{{ t('register.accountCreated') }}</p>
       </Transition>
 
       <form @submit="register" novalidate>
 
-        <!-- Role Toggle -->
         <div class="roleToggle">
           <label class="roleBtn" :class="{ active: formData.role === 'client' }">
             <input type="radio" v-model="formData.role" value="client" style="display:none">
-            I am a Patient
+            {{ t('register.iAmPatient') }}
           </label>
           <label class="roleBtn" :class="{ active: formData.role === 'doctor' }">
             <input type="radio" v-model="formData.role" value="doctor" style="display:none">
-            I am a Doctor
+            {{ t('register.iAmDoctor') }}
           </label>
         </div>
 
-        <!-- Name -->
         <div class="field">
-          <label for="reg-name">Full name</label>
+          <label for="reg-name">{{ t('register.fullName') }}</label>
           <div class="inputWrap">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-            <input id="reg-name" v-model="formData.name" type="text" placeholder="Your full name" required
+            <input id="reg-name" v-model="formData.name" type="text" :placeholder="t('register.fullNamePlaceholder')" required
               autocomplete="name" />
           </div>
         </div>
 
-        <!-- Email -->
         <div class="field">
-          <label for="reg-email">Email</label>
+          <label for="reg-email">{{ t('register.email') }}</label>
           <div class="inputWrap">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
               <polyline points="22,6 12,13 2,6" />
             </svg>
-            <input id="reg-email" v-model="formData.email" type="email" placeholder="you@example.com" required
+            <input id="reg-email" v-model="formData.email" type="email" :placeholder="t('register.emailPlaceholder')" required
               autocomplete="email" />
           </div>
         </div>
 
-        <!-- Password row -->
         <div class="fieldRow">
           <div class="field">
-            <label for="reg-password">Password</label>
+            <label for="reg-password">{{ t('register.password') }}</label>
             <div class="inputWrap">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -175,7 +174,7 @@ const register = async (e) => {
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
               <input id="reg-password" v-model="formData.password" :type="showPass ? 'text' : 'password'"
-                placeholder="••••••••" required autocomplete="new-password" />
+                :placeholder="t('register.passwordPlaceholder')" required autocomplete="new-password" />
               <button type="button" class="eyeBtn" @click="showPass = !showPass">
                 <svg v-if="!showPass" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
                   fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -193,7 +192,7 @@ const register = async (e) => {
           </div>
 
           <div class="field">
-            <label for="reg-confirm">Confirm</label>
+            <label for="reg-confirm">{{ t('register.confirm') }}</label>
             <div class="inputWrap">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -201,7 +200,7 @@ const register = async (e) => {
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
               <input id="reg-confirm" v-model="formData.password_confirmation" :type="showConfirm ? 'text' : 'password'"
-                placeholder="••••••••" required autocomplete="new-password" />
+                :placeholder="t('register.passwordPlaceholder')" required autocomplete="new-password" />
               <button type="button" class="eyeBtn" @click="showConfirm = !showConfirm">
                 <svg v-if="!showConfirm" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
                   fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -219,10 +218,9 @@ const register = async (e) => {
           </div>
         </div>
 
-        <!-- Gender + Birthday row -->
         <div class="fieldRow">
           <div class="field">
-            <label for="reg-gender">Gender</label>
+            <label for="reg-gender">{{ t('register.gender') }}</label>
             <div class="inputWrap selectWrap">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -231,15 +229,15 @@ const register = async (e) => {
                   d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M18.66 5.34l1.41-1.41" />
               </svg>
               <select id="reg-gender" v-model="formData.gender" required>
-                <option value="" disabled>Select</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
+                <option value="" disabled>{{ t('register.selectGender') }}</option>
+                <option value="male">{{ t('register.male') }}</option>
+                <option value="female">{{ t('register.female') }}</option>
               </select>
             </div>
           </div>
 
           <div class="field">
-            <label for="reg-birthday">Birthday</label>
+            <label for="reg-birthday">{{ t('register.birthday') }}</label>
             <div class="inputWrap">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -253,27 +251,26 @@ const register = async (e) => {
           </div>
         </div>
 
-        <!-- DOCTOR EXTRA FIELDS -->
         <div v-if="formData.role === 'doctor'" class="doctorFieldsWrapper">
-          <h3 class="doctorFieldsTitle">Professional Information</h3>
+          <h3 class="doctorFieldsTitle">{{ t('register.professionalInfo') }}</h3>
 
           <div class="fieldRow">
             <div class="field">
-              <label>Specialty</label>
+              <label>{{ t('register.specialty') }}</label>
               <div class="inputWrap selectWrap">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                 </svg>
                 <select v-model="formData.doctor_specialty_id" required>
-                  <option value="" disabled>Select Specialty</option>
-                  <option v-for="spec in specialties" :key="spec.id" :value="spec.id">{{ spec.name }}</option>
+                  <option value="" disabled>{{ t('register.selectSpecialty') }}</option>
+                  <option v-for="spec in specialties" :key="spec.id" :value="spec.id">{{ spec.id ? t(`specialties.${spec.id}`) : spec.name }}</option>
                 </select>
               </div>
             </div>
 
             <div class="field">
-              <label>Experience Start Date</label>
+              <label>{{ t('register.experienceStartDate') }}</label>
               <div class="inputWrap">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -290,7 +287,7 @@ const register = async (e) => {
 
           <div class="fieldRow">
             <div class="field">
-              <label>Hospital/Clinic Name</label>
+              <label>{{ t('register.hospitalName') }}</label>
               <div class="inputWrap">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -300,11 +297,11 @@ const register = async (e) => {
                   <path d="M10 9h4" />
                   <path d="M12 7v4" />
                 </svg>
-                <input type="text" v-model="formData.hospital_name" placeholder="City General Hospital" required />
+                <input type="text" v-model="formData.hospital_name" :placeholder="t('register.hospitalPlaceholder')" required />
               </div>
             </div>
             <div class="field">
-              <label>City</label>
+              <label>{{ t('register.city') }}</label>
               <div class="inputWrap selectWrap">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -312,7 +309,7 @@ const register = async (e) => {
                   <circle cx="12" cy="10" r="3" />
                 </svg>
                 <select v-model="formData.city" required>
-                  <option value="" disabled>Select City</option>
+                  <option value="" disabled>{{ t('register.selectCity') }}</option>
                   <option v-for="city in cities" :key="city" :value="city">{{ city }}</option>
                 </select>
               </div>
@@ -320,21 +317,21 @@ const register = async (e) => {
           </div>
 
           <div class="field">
-            <label>Phone Number</label>
+            <label>{{ t('register.phoneNumber') }}</label>
             <div class="inputWrap">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path
                   d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
               </svg>
-              <input type="text" v-model="formData.phone_number" placeholder="+1 234 567 8900" required />
+              <input type="text" v-model="formData.phone_number" :placeholder="t('register.phonePlaceholder')" required />
             </div>
           </div>
 
           <div class="field">
-            <label>Professional Bio</label>
+            <label>{{ t('register.professionalBio') }}</label>
             <div class="inputWrap" style="padding: 12px 12px 12px 14px; align-items: flex-start;">
-              <textarea v-model="formData.bio" rows="4" placeholder="Briefly describe your experience and practice..."
+              <textarea v-model="formData.bio" rows="4" :placeholder="t('register.bioPlaceholder')"
                 required
                 style="width:100%; border:none; outline:none; resize:vertical; font-family:inherit; font-weight:600; font-size:14px; color:#000;"></textarea>
             </div>
@@ -342,13 +339,13 @@ const register = async (e) => {
         </div>
 
         <button type="submit" class="submitBtn" :disabled="loading">
-          <span v-if="!loading">Create Account</span>
+          <span v-if="!loading">{{ t('register.createAccountBtn') }}</span>
           <span v-else class="spinner"></span>
         </button>
 
       </form>
 
-      <p class="loginLink">Already have an account? <router-link to="/login">Sign in</router-link></p>
+      <p class="loginLink">{{ t('register.alreadyHaveAccount') }} <router-link to="/login">{{ t('register.signInLink') }}</router-link></p>
 
     </div>
   </div>

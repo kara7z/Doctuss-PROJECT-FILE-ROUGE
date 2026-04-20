@@ -18,6 +18,17 @@ const fetchUser = async () => {
       if (res.ok) {
         const data = await res.json()
         user.value = data.user
+      } else if (res.status === 403) {
+        // Account suspended - redirect to login with message
+        try {
+          const data = await res.json()
+          localStorage.setItem('suspendedMessage', data.message || 'Your account has been suspended.')
+        } catch {
+          localStorage.setItem('suspendedMessage', 'Your account has been suspended.')
+        }
+        user.value = null
+        window.location.href = '/login'
+        return
       } else {
         user.value = null
       }

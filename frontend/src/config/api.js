@@ -18,7 +18,7 @@ export const api = async (endpoint, options = {}) => {
     credentials: 'include',
     headers: {
       'Accept': 'application/json',
-      'Content-Type': 'application/json',
+      ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
       ...(xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}),
       ...options.headers,
     },
@@ -29,15 +29,17 @@ export const api = async (endpoint, options = {}) => {
   if (!response.ok) {
     const isAuthEndpoint = ['/login', '/register', '/me'].includes(endpoint)
 
+    // Handle specific status codes
     if (response.status === 401 && !isAuthEndpoint) {
       router.push('/login')
-    } else if (response.status === 403) {
+    } else if (response.status === 403 && !isAuthEndpoint) {
       router.push('/403')
-    } else if (response.status === 404) {
+    } else if (response.status === 404 && !endpoint.startsWith('/appointments')) {
       router.push('/404')
-    } else if (response.status >= 500) {
+    } else if (response.status >= 500 && !isAuthEndpoint) {
       router.push('/500')
     }
+    // 422 validation errors and other 4xx errors are handled by components
   }
 
   return response

@@ -1,6 +1,9 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { api } from '@/config/api'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const error = ref('')
 const success = ref(false)
@@ -51,36 +54,51 @@ const login = async (e) => {
   <div class="loginPage">
     <div class="loginCard" :class="{ shake: shaking }">
 
-      <router-link to="/" class="logo">doctuss</router-link>
+      <router-link to="/" class="logo">{{ t('nav.brand') }}</router-link>
 
       <div class="cardHeader">
-        <h1 class="cardTitle">Welcome back</h1>
-        <p class="cardSub">Sign in to continue</p>
+        <h1 class="cardTitle">{{ t('login.welcomeBack') }}</h1>
+        <p class="cardSub">{{ t('login.signInToContinue') }}</p>
       </div>
 
       <Transition name="slide">
-        <p v-if="error" class="alertError">{{ error }}</p>
+        <div v-if="error" class="alertError">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+          <span>{{ error }}</span>
+        </div>
       </Transition>
+
+
+
       <Transition name="slide">
-        <p v-if="success" class="alertSuccess">Login successful! Redirecting…</p>
+        <div v-if="success" class="alertSuccess">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>{{ t('login.loginSuccessful') }}</span>
+        </div>
       </Transition>
 
       <form @submit="login" novalidate>
         <div class="field">
-          <label for="email">Email</label>
+          <label for="email">{{ t('login.email') }}</label>
           <div class="inputWrap">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
               <polyline points="22,6 12,13 2,6" />
             </svg>
-            <input id="email" v-model="formData.email" type="email" placeholder="you@example.com" required
+            <input id="email" v-model="formData.email" type="email" :placeholder="t('login.emailPlaceholder')" required
               autocomplete='off' />
           </div>
         </div>
 
         <div class="field">
-          <label for="password">Password</label>
+          <label for="password">{{ t('login.password') }}</label>
           <div class="inputWrap">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -88,7 +106,7 @@ const login = async (e) => {
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
             <input id="password" v-model="formData.password" :type="showPass ? 'text' : 'password'"
-              placeholder="••••••••" required autocomplete="off" />
+              :placeholder="t('login.passwordPlaceholder')" required autocomplete="off" />
             <button type="button" class="eyeBtn" @click="showPass = !showPass">
               <svg v-if="!showPass" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -106,16 +124,16 @@ const login = async (e) => {
         </div>
 
         <div class="forgotRow">
-          <a href="#" class="forgot">Forgot password?</a>
+          <a href="#" class="forgot">{{ t('login.forgotPassword') }}</a>
         </div>
 
         <button type="submit" class="submitBtn" :disabled="loading">
-          <span v-if="!loading">Sign In</span>
+          <span v-if="!loading">{{ t('login.signIn') }}</span>
           <span v-else class="spinner"></span>
         </button>
       </form>
 
-      <p class="registerLink">No account? <router-link to="/register">Create one</router-link></p>
+      <p class="registerLink">{{ t('login.noAccount') }} <router-link to="/register">{{ t('login.createOne') }}</router-link></p>
 
     </div>
   </div>
@@ -212,6 +230,14 @@ const login = async (e) => {
   font-size: 13px;
   font-weight: 700;
   color: #900;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alertError svg {
+  flex-shrink: 0;
+  stroke: #900;
 }
 
 .alertSuccess {
@@ -219,6 +245,14 @@ const login = async (e) => {
   font-size: 13px;
   font-weight: 700;
   color: #060;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alertSuccess svg {
+  flex-shrink: 0;
+  stroke: #060;
 }
 
 .slide-enter-active {
@@ -234,6 +268,8 @@ const login = async (e) => {
   opacity: 0;
   transform: translateY(-4px);
 }
+
+
 
 @keyframes shake {
 
