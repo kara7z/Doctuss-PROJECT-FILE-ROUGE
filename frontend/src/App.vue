@@ -4,11 +4,14 @@ import { RouterView } from 'vue-router'
 import Footer from './components/Footer.vue';
 import Navbar from './components/Navbar.vue';
 import { useAuth } from '@/composables/useAuth';
+import { useLanguage } from '@/composables/useLanguage';
 
 const { ready, fetchUser } = useAuth();
+const { initLanguage } = useLanguage();
 
 onMounted(() => {
   fetchUser();
+  initLanguage();
 })
 </script>
 
@@ -33,9 +36,41 @@ onMounted(() => {
     text-decoration: none;
     list-style: none;
   }
+  html{
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+  }
   body{
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
     background-color: #042464;
     color: white;
+    position: fixed;
+  }
+  
+  #app {
+    width: 100%;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .pageLayout {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    min-height: 100vh;
+  }
+  
+  * {
+    overscroll-behavior-x: none;
+  }
+  
+  html, body, #app {
+    overscroll-behavior-x: none;
   }
 
   
