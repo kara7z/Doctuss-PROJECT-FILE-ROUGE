@@ -81,6 +81,7 @@ class DoctorController extends Controller
             $todayStr = $now->toDateString();
             $currentTime = $now->format('H:i:s');
             $todayIndex = $now->dayOfWeek;
+            $hourAgo = $now->copy()->subHour();
 
             if ($status === 'Unavailable') {
                 $query->whereHas('doctorProfile', function ($dp) use ($todayStr, $currentTime, $todayIndex) {
@@ -95,7 +96,7 @@ class DoctorController extends Controller
                     });
                 });
             } else {
-                $query->whereHas('doctorProfile', function ($dp) use ($todayStr, $currentTime, $todayIndex, $now, $status) {
+                $query->whereHas('doctorProfile', function ($dp) use ($todayStr, $currentTime, $todayIndex, $now, $hourAgo, $status) {
                     $dp->where(function ($q) use ($todayStr, $currentTime, $todayIndex) {
                         $q->whereHas('workingDates', function ($wd) use ($todayStr, $currentTime) {
                             $wd->whereDate('working_date', $todayStr)
@@ -109,18 +110,32 @@ class DoctorController extends Controller
                     });
 
                     if ($status === 'Available') {
-                        $dp->whereDoesntHave('appointments', function ($appt) use ($now) {
+                        $dp->whereDoesntHave('appointments', function ($appt) use ($now, $hourAgo) {
                             $appt->where('status', 'approved')
-                                 ->whereNotNull('proposed_at')
-                                 ->where('proposed_at', '<=', $now)
-                                 ->where('proposed_at', '>=', $now->copy()->subHour());
+                                 ->where(function ($q) use ($now, $hourAgo) {
+                                     $q->where(function ($q2) use ($now, $hourAgo) {
+                                         $q2->whereNotNull('proposed_at')
+                                            ->whereBetween('proposed_at', [$hourAgo, $now]);
+                                     })->orWhere(function ($q2) use ($now, $hourAgo) {
+                                         $q2->whereNull('proposed_at')
+                                            ->whereNotNull('preferred_at')
+                                            ->whereBetween('preferred_at', [$hourAgo, $now]);
+                                     });
+                                 });
                         });
                     } elseif ($status === 'Busy') {
-                        $dp->whereHas('appointments', function ($appt) use ($now) {
+                        $dp->whereHas('appointments', function ($appt) use ($now, $hourAgo) {
                             $appt->where('status', 'approved')
-                                 ->whereNotNull('proposed_at')
-                                 ->where('proposed_at', '<=', $now)
-                                 ->where('proposed_at', '>=', $now->copy()->subHour());
+                                 ->where(function ($q) use ($now, $hourAgo) {
+                                     $q->where(function ($q2) use ($now, $hourAgo) {
+                                         $q2->whereNotNull('proposed_at')
+                                            ->whereBetween('proposed_at', [$hourAgo, $now]);
+                                     })->orWhere(function ($q2) use ($now, $hourAgo) {
+                                         $q2->whereNull('proposed_at')
+                                            ->whereNotNull('preferred_at')
+                                            ->whereBetween('preferred_at', [$hourAgo, $now]);
+                                     });
+                                 });
                         });
                     }
                 });
@@ -131,7 +146,7 @@ class DoctorController extends Controller
         
         $doctors = $query->with(['doctorProfile' => function ($query) {
             $query->withCount('reviews')
-                  ->with(['specialty.category', 'schedules', 'reviews.user', 'appointments' => function($q) {
+                  ->with(['specialty.category', 'schedules', 'workingDates', 'reviews.user', 'appointments' => function($q) {
                       $q->whereIn('status', ['approved', 'pending']);
                   }]);
         }])->paginate($perPage);

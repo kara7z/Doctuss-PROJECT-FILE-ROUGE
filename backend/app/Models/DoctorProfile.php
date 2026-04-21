@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Validation\ValidationException;
 use App\Enums\AppointmentStatus;
 use App\Models\DoctorWorkingDate;
-use Carbon\Carbon;
 
 class DoctorProfile extends Model
 {
@@ -93,46 +92,38 @@ class DoctorProfile extends Model
         $now = now();
         $todayStr = $now->toDateString();
         $currentTime = $now->format('H:i:s');
-        $isDuringShift = false;
-
-        // First, check explicit working_dates for today
-        if ($this->relationLoaded('workingDates')) {
-            $todayWorkingDate = $this->workingDates
-                ->first(fn($wd) => $wd->working_date->toDateString() === $todayStr);
-
-            if ($todayWorkingDate) {
-                $isDuringShift = $currentTime >= $todayWorkingDate->start_time
-                    && $currentTime < $todayWorkingDate->end_time;
-            }
-        }
-
-        // Fallback to recurring schedules
-        if (!$isDuringShift && $this->relationLoaded('schedules')) {
-            $todayIndex = $now->dayOfWeek;
-            $todaysSchedules = $this->schedules->where('day_of_week', $todayIndex);
-            foreach ($todaysSchedules as $schedule) {
-                if ($currentTime >= $schedule->start_time && $currentTime < $schedule->end_time) {
-                    $isDuringShift = true;
-                    break;
-                }
-            }
-        }
+        $todayIndex = $now->dayOfWeek;
+        $isDuringShift = $this->workingDates()
+            ->whereDate('working_date', $todayStr)
+            ->where('start_time', '<=', $currentTime)
+            ->where('end_time', '>', $currentTime)
+            ->exists()
+            || $this->schedules()
+                ->where('day_of_week', $todayIndex)
+                ->where('start_time', '<=', $currentTime)
+                ->where('end_time', '>', $currentTime)
+                ->exists();
 
         if (!$isDuringShift) {
             return 'Unavailable';
         }
 
-        // Must eager load appointments!
-        $activeAppointments = $this->appointments
-            ->where('status', AppointmentStatus::APPROVED)
-            ->filter(function ($appt) use ($now) {
-                if (!$appt->proposed_at) return false;
-                $start = Carbon::parse($appt->proposed_at);
-                $end = $start->copy()->addHour();
-                return $now->between($start, $end);
-            });
+        $hourAgo = $now->copy()->subHour();
+        $activeAppointments = $this->appointments()
+            ->where('status', AppointmentStatus::APPROVED->value)
+            ->where(function ($query) use ($hourAgo, $now) {
+                $query->where(function ($q) use ($hourAgo, $now) {
+                    $q->whereNotNull('proposed_at')
+                        ->whereBetween('proposed_at', [$hourAgo, $now]);
+                })->orWhere(function ($q) use ($hourAgo, $now) {
+                    $q->whereNull('proposed_at')
+                        ->whereNotNull('preferred_at')
+                        ->whereBetween('preferred_at', [$hourAgo, $now]);
+                });
+            })
+            ->exists();
 
-        if ($activeAppointments->isNotEmpty()) {
+        if ($activeAppointments) {
             return 'Busy';
         }
 

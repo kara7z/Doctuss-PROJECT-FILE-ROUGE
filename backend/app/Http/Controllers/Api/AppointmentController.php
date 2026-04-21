@@ -6,9 +6,11 @@ use App\Enums\AppointmentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AppointmentResource;
 use App\Models\Appointment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 
 class AppointmentController extends Controller
 {
@@ -40,27 +42,45 @@ class AppointmentController extends Controller
             'status' => ['nullable', 'in:' . implode(',', AppointmentStatus::values())],
         ]);
 
-        $preferredAt = \Carbon\Carbon::parse($data['preferred_at']);
+        $existingActiveAppointment = Appointment::query()
+            ->where('client_id', $request->user()->id)
+            ->where('doctor_profile_id', $data['doctor_profile_id'])
+            ->whereIn('status', [AppointmentStatus::PENDING->value, AppointmentStatus::APPROVED->value])
+            ->exists();
+
+        if ($existingActiveAppointment) {
+            throw ValidationException::withMessages([
+                'doctor_profile_id' => [__('You can only have one active appointment per doctor at a time.')]
+            ]);
+        }
+
+        $preferredAt = Carbon::parse($data['preferred_at']);
+        if ($preferredAt->lt(now()->addHour())) {
+            throw ValidationException::withMessages([
+                'preferred_at' => ['appointment.must_be_one_hour_ahead']
+            ]);
+        }
+
+        $userId = $request->user()->id;
         $conflict = Appointment::query()
             ->where('doctor_profile_id', $data['doctor_profile_id'])
             ->where(function ($query) use ($preferredAt) {
                 $query->where('preferred_at', $preferredAt)
                       ->orWhere('proposed_at', $preferredAt);
             })
-            ->where(function ($query) {
-                $query->where('status', AppointmentStatus::APPROVED)
-                      ->orWhere(function ($q2) {
+            ->where(function ($query) use ($userId) {
+                $query->where('status', AppointmentStatus::APPROVED->value)
+                      ->orWhere(function ($q2) use ($userId) {
                           $q2->where('status', AppointmentStatus::PENDING)
-                             ->where('client_id', auth()->id());
+                             ->where('client_id', $userId);
                       });
             })
             ->exists();
 
         if ($conflict) {
-            return response()->json([
-                'message' => 'This time slot is already booked.',
-                'errors' => ['preferred_at' => ['This time slot is already booked by you or is already approved.']]
-            ], 422);
+            throw ValidationException::withMessages([
+                'preferred_at' => [__('This time slot is already booked by you or is already approved.')]
+            ]);
         }
 
         $appointment = Appointment::query()->create([
@@ -92,6 +112,40 @@ class AppointmentController extends Controller
             'proposed_at' => ['nullable', 'date'],
             'status' => ['sometimes', 'in:' . implode(',', AppointmentStatus::values())],
         ]);
+
+        $targetStatus = $data['status'] ?? ($appointment->status?->value ?? $appointment->status);
+        if ($targetStatus === AppointmentStatus::APPROVED->value) {
+            $approvedAt = isset($data['proposed_at']) && $data['proposed_at']
+                ? Carbon::parse($data['proposed_at'])
+                : ($appointment->proposed_at ?: $appointment->preferred_at);
+
+            if ($approvedAt && $approvedAt->lt(now()->addHour())) {
+                throw ValidationException::withMessages([
+                    'proposed_at' => ['appointment.must_be_one_hour_ahead']
+                ]);
+            }
+
+            if ($approvedAt) {
+                $conflict = Appointment::query()
+                    ->where('doctor_profile_id', $appointment->doctor_profile_id)
+                    ->where('id', '!=', $appointment->id)
+                    ->where('status', AppointmentStatus::APPROVED->value)
+                    ->where(function ($query) use ($approvedAt) {
+                        $query->where('proposed_at', $approvedAt)
+                              ->orWhere(function ($q2) use ($approvedAt) {
+                                  $q2->whereNull('proposed_at')
+                                     ->where('preferred_at', $approvedAt);
+                              });
+                    })
+                    ->exists();
+
+                if ($conflict) {
+                    throw ValidationException::withMessages([
+                        'proposed_at' => [__('This time slot is already approved for another client.')]
+                    ]);
+                }
+            }
+        }
 
         $appointment->update($data);
 
