@@ -303,7 +303,21 @@
     "selectTime": "Select a Time",
     "doctorNotFound": "Doctor not found or not available.",
     "failedToLoad": "Failed to load doctor profile. Please try again later.",
-    "errorOccurred": "An error occurred while loading the profile."
+    "errorOccurred": "An error occurred while loading the profile.",
+    "activeAppointmentLimit": "You have reached the maximum of {limit} active appointments with this doctor.",
+    "unavailable": "Unavailable",
+    "alreadyHavePending": "You already have a pending appointment at this time.",
+    "alreadyBookedSlot": "This slot is not available.",
+    "slotAlreadyBookedBackend": "This time slot is already booked.",
+    "slotNotAvailable": "This slot is not available right now.",
+    "mustBeOneHourAhead": "You must select a time at least one hour from now.",
+    "noPermission": "You are not allowed to make this booking.",
+    "loginToBook": "Please log in to book an appointment.",
+    "failedToBook": "Failed to book appointment.",
+    "bookingError": "An error occurred while booking. Please try again."
+  },
+  "appointment": {
+    "must_be_one_hour_ahead": "You must select a time at least one hour from now."
   },
   "days": {
     "sunday": "Sunday",
@@ -404,6 +418,12 @@
     "viewDoctor": "View Doctor",
     "leaveReview": "Leave a Review",
     "reviewed": "✓ Reviewed",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "closed": "Closed",
+      "cancelled": "Cancelled"
+    },
     "reviewModal": {
       "title": "Review Your Visit",
       "rating": "Rating (1-5)",
@@ -559,5 +579,42 @@
     "pending": "Pending",
     "approved": "Approved",
     "rejected": "Rejected"
+  },
+  "doctorDashboard": {
+    "closeConfirm": "Are you sure you want to mark this appointment as closed?",
+    "title": "Doctor",
+    "titleHighlight": "Dashboard",
+    "verificationStatus": "Verification Status",
+    "adminNotes": "Admin Notes:",
+    "noRequests": "No verification requests found.",
+    "loadingAppointments": "Loading appointments...",
+    "pendingRequests": "Pending Requests",
+    "noPending": "No pending requests.",
+    "unknownPatient": "Unknown Patient",
+    "pending": "Pending",
+    "requestedTime": "Requested Time:",
+    "yourProposal": "Your Proposal:",
+    "approvePropose": "Approve / Propose",
+    "previous": "Previous",
+    "next": "Next",
+    "approvedAppointments": "Approved Appointments",
+    "noApproved": "No approved appointments.",
+    "approved": "Approved",
+    "appointmentTime": "Appointment Time:",
+    "markClosed": "Mark Closed",
+    "closedAppointments": "Closed Appointments",
+    "noClosed": "No closed appointments.",
+    "closed": "Closed",
+    "completed": "Completed:",
+    "approveAppointment": "Approve Appointment",
+    "patient": "Patient:",
+    "approveAsRequested": "Approve as Requested",
+    "acceptPreferred": "Accept the patient's preferred time.",
+    "or": "OR",
+    "proposeAlternative": "Propose Alternative Time",
+    "date": "Date",
+    "time": "Time",
+    "approveWithProposed": "Approve with Proposed Time",
+    "suggestDifferent": "Suggest a different time to the patient."
   }
 }

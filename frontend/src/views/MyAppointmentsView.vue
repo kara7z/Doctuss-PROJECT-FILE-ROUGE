@@ -5,7 +5,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const { user, ready } = useAuth()
 const router = useRouter()
 
@@ -103,6 +103,11 @@ const formatDate = (dateStr) => {
     return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
 }
 
+const getStatusLabel = (status) => {
+    const key = `appointments.status.${status}`
+    return te(key) ? t(key) : status
+}
+
 </script>
 
 <template>
@@ -129,7 +134,7 @@ const formatDate = (dateStr) => {
             <div v-else class="appointmentsList">
                 <div class="appointmentCard" v-for="app in appointments" :key="app.id">
                     <div class="appHeader">
-                        <span class="statusBadge" :class="'status-' + app.status">{{ app.status }}</span>
+                        <span class="statusBadge" :class="'status-' + app.status">{{ getStatusLabel(app.status) }}</span>
                         <h3>Dr. {{ app.doctor_profile?.user?.name || t('appointments.unknownDoctor') }}</h3>
                     </div>
                     <div class="appBody">

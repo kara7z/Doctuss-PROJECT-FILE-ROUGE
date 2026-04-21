@@ -236,7 +236,11 @@ const updateProfile = async () => {
       }, 2000)
     } else {
       const data = await res.json()
-      updateError.value = data.message || t('common.error')
+      let errorMessage = t(data.message || 'common.error')
+      if (profile.value && errorMessage.includes('doctorProfile.activeAppointmentLimit') && profile.value.active_appointment_limit !== undefined) {
+        errorMessage = errorMessage.replace(/\{?doctorProfile\.activeAppointmentLimit\}?/g, profile.value.active_appointment_limit)
+      }
+      updateError.value = errorMessage
     }
   } catch (e) {
     updateError.value = t('common.error')
@@ -344,7 +348,7 @@ onMounted(() => {
 
         <div v-else-if="profile" class="profileContent">
           <!-- Banner Section -->
-          <div v-if="profile.banner_picture" class="bannerSection" :style="{ backgroundImage: `url(${profile.banner_picture})` }">
+          <div v-if="profile.banner_picture" class="bannerSection" :style="{ backgroundImage: 'url(' + profile.banner_picture + ')' }">
             <div class="bannerOverlay">
               <span v-if="!editMode && profile.is_verified" class="verificationBadge verified">
                 {{ t('myProfile.verified') }}

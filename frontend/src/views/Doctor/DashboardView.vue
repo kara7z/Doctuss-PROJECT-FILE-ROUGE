@@ -148,7 +148,15 @@ const approveAppointment = async (withProposal = false) => {
       closeModal()
     } else {
       const data = await res.json()
-      actionError.value = data.message || t('common.error')
+      if (res.status === 422) {
+        const proposedAtError = Array.isArray(data.errors?.proposed_at) ? data.errors.proposed_at[0] : ''
+
+        actionError.value = proposedAtError === 'appointment.must_be_one_hour_ahead'
+          ? t('appointment.must_be_one_hour_ahead')
+          : data.message || t('common.error')
+      } else {
+        actionError.value = data.message || t('common.error')
+      }
     }
   } catch (e) {
     actionError.value = t('common.error')

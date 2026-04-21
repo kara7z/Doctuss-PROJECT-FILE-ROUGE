@@ -5,7 +5,7 @@ import { api } from '@/config/api'
 import { useAuth } from '@/composables/useAuth'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { user } = useAuth()
@@ -87,6 +87,22 @@ const getTodayString = () => {
 }
 const minDate = getTodayString()
 
+const parseDateTime = (dateStr, timeStr) => {
+  const [year, month, day] = dateStr.split('-').map(Number)
+  const [hour, minute] = timeStr.split(':').map(Number)
+  return new Date(year, month - 1, day, hour, minute, 0, 0)
+}
+
+const getMinimumBookableDateTime = () => {
+  const now = new Date()
+  return new Date(now.getTime() + 60 * 60 * 1000)
+}
+
+const isAtLeastOneHourAhead = (dateStr, timeStr) => {
+  const selectedAt = parseDateTime(dateStr, timeStr)
+  return selectedAt.getTime() >= getMinimumBookableDateTime().getTime()
+}
+
 const upcomingWorkingDates = computed(() => {
   const dates = []
   const today = new Date()
@@ -103,7 +119,7 @@ const upcomingWorkingDates = computed(() => {
     if (hasShift) {
       dates.push({
         date: dateStr,
-        label: checkDate.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })
+        label: checkDate.toLocaleDateString(locale.value, { weekday: 'short', month: 'short', day: 'numeric' })
       })
       daysFound++
     }
@@ -141,19 +157,23 @@ const availableSlots = computed(() => {
   const slots = []
   for (let hour = shift.startHour; hour < shift.endHour; hour++) {
     const formattedHour = hour.toString().padStart(2, '0') + ':00'
+    const isPastMinimumTime = !isAtLeastOneHourAhead(selectedDate.value, formattedHour)
 
     const bookingInfo = profile.value.appointments?.find(app => {
-      const preferredAt = app.preferred_at
-      if (!preferredAt) return false
+      const slotDateTime = app.status === 'approved'
+        ? (app.proposed_at || app.preferred_at)
+        : app.preferred_at
+
+      if (!slotDateTime) return false
       
       let appDateStr, appTimeStr
       
-      if (preferredAt.includes('T')) {
-        const parts = preferredAt.split('T')
+      if (slotDateTime.includes('T')) {
+        const parts = slotDateTime.split('T')
         appDateStr = parts[0]
         appTimeStr = parts[1].substring(0, 5)
       } else {
-        const parts = preferredAt.split(' ')
+        const parts = slotDateTime.split(' ')
         appDateStr = parts[0]
         appTimeStr = parts[1] ? parts[1].substring(0, 5) : '00:00'
       }
@@ -161,26 +181,30 @@ const availableSlots = computed(() => {
       return appDateStr === selectedDate.value && appTimeStr === formattedHour
     })
 
-    let isAvailable = true
     let isDisabled = false
     let reason = ''
+    let isBooked = false
 
-    if (bookingInfo) {
+    if (isPastMinimumTime) {
+      isDisabled = true
+      reason = t('appointment.must_be_one_hour_ahead')
+    } else if (bookingInfo) {
       if (bookingInfo.status === 'approved') {
-        isAvailable = false
+        isDisabled = true
+        isBooked = true
+        reason = t('doctorProfile.booked')
       } else if (bookingInfo.status === 'pending' && user.value && bookingInfo.client_id === user.value.id) {
         isDisabled = true
-        reason = 'You already have a pending booking'
+        reason = t('doctorProfile.alreadyHavePending')
       }
     }
 
-    if (isAvailable) {
-      slots.push({
-        time: formattedHour,
-        disabled: isDisabled,
-        reason: reason
-      })
-    }
+    slots.push({
+      time: formattedHour,
+      disabled: isDisabled,
+      reason: reason,
+      isBooked: isBooked
+    })
   }
   
   return slots
@@ -196,7 +220,12 @@ const bookAppointment = async () => {
     
     const selectedSlot = availableSlots.value.find(s => s.time === selectedTime.value)
     if (selectedSlot?.disabled) {
-        bookingError.value = 'You have already booked this time slot'
+        bookingError.value = selectedSlot.reason || t('doctorProfile.alreadyBookedSlot')
+        return
+    }
+
+    if (!isAtLeastOneHourAhead(selectedDate.value, selectedTime.value)) {
+        bookingError.value = t('appointment.must_be_one_hour_ahead')
         return
     }
     
@@ -229,22 +258,27 @@ const bookAppointment = async () => {
             
             if (res.status === 422) {
                 if (data.errors?.preferred_at) {
-                    bookingError.value = data.errors.preferred_at[0]
+                    const preferredAtError = Array.isArray(data.errors.preferred_at) ? data.errors.preferred_at[0] : ''
+                    bookingError.value = preferredAtError === 'appointment.must_be_one_hour_ahead'
+                        ? t('appointment.must_be_one_hour_ahead')
+                        : t('doctorProfile.slotAlreadyBookedBackend')
+                } else if (data.errors?.doctor_profile_id) {
+                    bookingError.value = t('doctorProfile.activeAppointmentLimit')
                 } else {
-                    bookingError.value = data.message || 'This time slot is not available'
+                    bookingError.value = data.message || t('doctorProfile.slotNotAvailable')
                 }
                 await fetchDoctor()
             } else if (res.status === 403) {
-                bookingError.value = 'You do not have permission to book appointments'
+                bookingError.value = t('doctorProfile.noPermission')
             } else if (res.status === 401) {
-                bookingError.value = 'Please log in to book an appointment'
+                bookingError.value = t('doctorProfile.loginToBook')
             } else {
-                bookingError.value = data.message || 'Failed to book appointment. Please try again.'
+                bookingError.value = data.message || t('doctorProfile.failedToBook')
             }
         }
     } catch (e) {
         console.error('Booking error:', e)
-        bookingError.value = 'An error occurred while booking. Please try again.'
+        bookingError.value = t('doctorProfile.bookingError')
     } finally {
         bookingLoading.value = false
     }
@@ -258,6 +292,11 @@ const formatDate = (dateStr) => {
         t('months.september'), t('months.october'), t('months.november'), t('months.december')
     ]
     return `${monthNames[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
+}
+
+const getDayName = (dayOfWeek) => {
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+  return days[parseInt(dayOfWeek)] || 'sunday'
 }
 
 const isToday = (dayOfWeek) => {
@@ -303,7 +342,7 @@ const isCurrentlyAvailable = (schedule) => {
 
         <!-- Huge Hero Section -->
         <div class="heroCard">
-            <div class="heroBanner" :style="{ backgroundImage: profile.banner_picture ? `url(${profile.banner_picture})` : 'none', backgroundColor: profile.banner_picture ? 'transparent' : '#000' }">
+            <div class="heroBanner" :style="{ backgroundImage: profile.banner_picture ? 'url(' + profile.banner_picture + ')' : 'none', backgroundColor: profile.banner_picture ? 'transparent' : '#000' }">
                 <span class="statusBadge" :class="'status-' + profile.current_status">{{ t('search.status.' + (profile.current_status || 'unavailable').toLowerCase()) }}</span>
             </div>
             <div class="heroContent">
@@ -316,8 +355,8 @@ const isCurrentlyAvailable = (schedule) => {
                 <div class="heroDetails">
                     <h1 class="doctorName">{{ doctor.name }}</h1>
                     <div class="badges">
-                        <span class="specialtyBadge">{{ specialty.id ? t(`specialties.${specialty.id}`) : specialty.name }}</span>
-                        <span class="categoryBadge" v-if="category.name">{{ category.id ? t(`categories.${category.id}`) : category.name }}</span>
+                        <span class="specialtyBadge">{{ specialty.id ? t('specialties.' + specialty.id) : specialty.name }}</span>
+                        <span class="categoryBadge" v-if="category.name">{{ category.id ? t('categories.' + category.id) : category.name }}</span>
                     </div>
                 </div>
                 <div class="heroMetrics">
@@ -399,7 +438,7 @@ const isCurrentlyAvailable = (schedule) => {
                             <span class="reviewDate">{{ formatDate(review.created_at) }}</span>
                         </div>
                         <div class="reviewRating">
-                            <span v-for="i in 5" :key="i" class="star" :class="{ filled: i <= review.rating }">★</span>
+                                  <span v-for="i in 5" :key="i" class="star" :class="{ filled: review.rating >= i }">★</span>
                         </div>
                         <p class="reviewComment" v-if="review.comment">{{ review.comment }}</p>
                     </div>
@@ -414,7 +453,7 @@ const isCurrentlyAvailable = (schedule) => {
                 <h2 class="blockTitleSmall">{{ t('doctorProfile.workingHours') }} <span class="highlightText">{{ t('doctorProfile.hours') }}</span></h2>
                 <div class="scheduleList">
                     <div class="scheduleItem" v-for="schedule in profile.schedules" :key="schedule.id" :class="{ 'currentDay': isToday(schedule.day_of_week) }">
-                        <span class="scheduleDay">{{ t(`days.${schedule.day_name.toLowerCase()}`) }}</span>
+                        <span class="scheduleDay">{{ t('days.' + getDayName(schedule.day_of_week)) }}</span>
                         <span class="scheduleHours">
                             {{ schedule.start_time.substring(0, 5) }} &mdash; {{ schedule.end_time.substring(0, 5) }}
                         </span>
@@ -433,7 +472,7 @@ const isCurrentlyAvailable = (schedule) => {
                 <h2 class="blockTitleSmall">{{ t('doctorProfile.bookAppointment') }}</h2>
 
                 <div v-if="!user">
-                    <p class="authText">{{ t('doctorProfile.pleaseLogin') }} <a href="#" @click.prevent="router.push('/login')">{{ t('doctorProfile.logIn') }}</a> {{ t('doctorProfile.toBook') }}.</p>
+                    <p class="authText">{{ t('doctorProfile.pleaseLogin') }} <a href="#" @click.prevent="router.push('/login')">{{ t('doctorProfile.logIn') }}</a> {{ t('doctorProfile.toBookAppointment') }}.</p>
                 </div>
                 <div v-else-if="user.role !== 'client'">
                     <p class="authText warning">{{ t('doctorProfile.onlyClients') }}.</p>
@@ -441,7 +480,7 @@ const isCurrentlyAvailable = (schedule) => {
                 <div v-else>
                     <!-- Upcoming working dates chips -->
                     <div v-if="upcomingWorkingDates.length > 0" class="workingDateHints">
-                        <p class="slotsLabel">{{ t('doctorProfile.nextAvailableDates') }}</p>
+                        <p class="slotsLabel">{{ t('doctorProfile.next7Days') }}</p>
                         <div class="workingDatesList">
                             <button
                                 v-for="dateInfo in upcomingWorkingDates"
@@ -480,20 +519,20 @@ const isCurrentlyAvailable = (schedule) => {
                                     @click="selectedTime = slot.time"
                                 >
                                     {{ slot.time }}
-                                    <span v-if="slot.disabled" class="disabledLabel">{{ t('doctorProfile.booked') }}</span>
+                                    <span v-if="slot.disabled" class="disabledLabel">{{ slot.isBooked ? t('doctorProfile.booked') : t('doctorProfile.unavailable') }}</span>
                                 </button>
                             </div>
                             <p v-if="availableSlots.every(s => s.disabled)" class="infoText">
-                                {{ t('doctorProfile.alreadyBookedSlots') }}
+                                {{ t('doctorProfile.alreadyBookedAll') }}
                             </p>
                         </template>
                         <template v-else>
-                            <p class="unavailableText">{{ t('doctorProfile.allBooked') }}.</p>
+                            <p class="unavailableText">{{ t('doctorProfile.allSlotsBooked') }}.</p>
                         </template>
                     </div>
 
                     <div v-if="bookingError" class="bookingAlert errorAlert">{{ bookingError }}</div>
-                    <div v-if="bookingSuccess" class="bookingAlert successAlert">{{ t('doctorProfile.bookingSuccess') }}</div>
+                    <div v-if="bookingSuccess" class="bookingAlert successAlert">{{ t('doctorProfile.appointmentBooked') }}</div>
 
                     <button
                         v-if="selectedDate && selectedDateHasShift && availableSlots.length > 0"
@@ -501,7 +540,7 @@ const isCurrentlyAvailable = (schedule) => {
                         :disabled="!selectedTime || bookingLoading || availableSlots.find(s => s.time === selectedTime)?.disabled"
                         @click="bookAppointment"
                     >
-                        {{ bookingLoading ? t('doctorProfile.booking') : (selectedTime ? `${t('doctorProfile.confirmFor')} ${selectedTime}` : t('doctorProfile.selectTime')) }}
+                        {{ bookingLoading ? t('doctorProfile.booking') : (selectedTime ? t('doctorProfile.confirmFor') + ' ' + selectedTime : t('doctorProfile.selectTime')) }}
                     </button>
                 </div>
             </div>
@@ -878,11 +917,6 @@ const isCurrentlyAvailable = (schedule) => {
 .workingDateChip:hover {
   background: #f0f0f0;
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px #000;
-}
-.workingDateChip.activeChip {
-  background: #F6D506;
-  transform: translate(2px, 2px);
-  box-shadow: 0px 0px 0px #000;
+  box-shadow: 4px 4px;
 }
 </style>
