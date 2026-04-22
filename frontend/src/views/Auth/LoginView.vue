@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
-import { api } from '@/config/api'
+import { api, setAuthToken } from '@/config/api'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -40,6 +40,7 @@ const login = async (e) => {
         : data.message || 'Login failed. Please try again.'
       return
     }
+    setAuthToken(data.token)
     success.value = true
     setTimeout(() => { window.location.href = '/' }, 1500)
   } catch {

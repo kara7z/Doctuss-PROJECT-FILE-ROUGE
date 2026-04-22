@@ -295,7 +295,7 @@
     "notWorkingDay": "The doctor is not working on this day.",
     "availableSlots": "Available Slots",
     "booked": "Booked",
-    "alreadyBookedAll": "You have already booked all available slots for this date.",
+    "alreadyBookedAll": "There are no available slots for this date.",
     "allSlotsBooked": "All slots are fully booked for this date.",
     "appointmentBooked": "Appointment Booked Successfully!",
     "booking": "Booking...",

@@ -78,7 +78,7 @@ const avatarLetter = computed(() => user.value?.name?.[0]?.toUpperCase() ?? '?')
 
       <!-- Mobile auth -->
       <li class="mobile-login">
-        <button v-if="fullName" class="userBtn" @click="logout">
+        <button v-if="fullName" type="button" class="userBtn" @click="logout">
           {{ fullName }}
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
@@ -89,7 +89,7 @@ const avatarLetter = computed(() => user.value?.name?.[0]?.toUpperCase() ?? '?')
     <!-- Desktop auth -->
     <template v-if="fullName">
       <div class="userMenu">
-        <button class="userBtn" @click="logout">
+        <button type="button" class="userBtn" @click="logout">
           <span class="userAvatar">{{ avatarLetter }}</span>
           {{ fullName }}
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -98,7 +98,7 @@ const avatarLetter = computed(() => user.value?.name?.[0]?.toUpperCase() ?? '?')
     </template>
     <router-link v-else to="/login" class="desktop-login navAuthBtn">{{ t('nav.login') }}</router-link>
 
-    <button class="burger" @click="toggleMenu" :class="{ active: isMenuOpen }">
+    <button type="button" class="burger" @click="toggleMenu" :class="{ active: isMenuOpen }">
       <span></span>
       <span></span>
       <span></span>

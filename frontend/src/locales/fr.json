@@ -295,7 +295,7 @@
     "notWorkingDay": "Le médecin ne consulte pas ce jour-là.",
     "availableSlots": "Créneaux disponibles",
     "booked": "Réservé",
-    "alreadyBookedAll": "Vous avez déjà réservé tous les créneaux disponibles pour cette date.",
+    "alreadyBookedAll": "Aucun créneau n'est disponible à cette date.",
     "allSlotsBooked": "Tous les créneaux sont réservés pour cette date.",
     "appointmentBooked": "Rendez-vous réservé avec succès !",
     "booking": "Réservation en cours...",

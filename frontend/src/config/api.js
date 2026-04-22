@@ -1,17 +1,31 @@
 import router from '@/router'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
-const SANCTUM_URL  = import.meta.env.VITE_SANCTUM_URL  || 'http://localhost:8000/sanctum/csrf-cookie'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+const SANCTUM_URL  = import.meta.env.VITE_SANCTUM_URL  || '/sanctum/csrf-cookie'
+const AUTH_TOKEN_KEY = 'auth_token'
 
 const getCookie = (name) => {
   const match = document.cookie.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'))
   return match ? decodeURIComponent(match[1]) : null
 }
 
+const getAuthToken = () => localStorage.getItem(AUTH_TOKEN_KEY)
+
+const setAuthToken = (token) => {
+  if (token) {
+    localStorage.setItem(AUTH_TOKEN_KEY, token)
+  }
+}
+
+const clearAuthToken = () => {
+  localStorage.removeItem(AUTH_TOKEN_KEY)
+}
+
 export const api = async (endpoint, options = {}) => {
   await fetch(SANCTUM_URL, { credentials: 'include' })
   
   const xsrfToken = getCookie('XSRF-TOKEN')
+  const authToken = getAuthToken()
 
   const config = {
     ...options,
@@ -20,6 +34,7 @@ export const api = async (endpoint, options = {}) => {
       'Accept': 'application/json',
       ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
       ...(xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}),
+      ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
       ...options.headers,
     },
   }
@@ -45,4 +60,4 @@ export const api = async (endpoint, options = {}) => {
   return response
 }
 
-export { API_BASE_URL }
+export { API_BASE_URL, clearAuthToken, getAuthToken, setAuthToken }

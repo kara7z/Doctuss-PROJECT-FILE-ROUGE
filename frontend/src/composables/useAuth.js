@@ -1,5 +1,6 @@
 import { ref } from 'vue'
-import { api } from '@/config/api'
+import router from '@/router'
+import { api, clearAuthToken } from '@/config/api'
 
 const user    = ref(null)
 const loading = ref(false)
@@ -48,8 +49,11 @@ const logout = async () => {
   try {
     await api('/logout', { method: 'POST' })
   } finally {
+    clearAuthToken()
+    localStorage.removeItem('suspendedMessage')
     user.value = null
-    window.location.href = '/'
+    ready.value = true
+    await router.push('/')
   }
 }
 
