@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { api, API_BASE_URL } from '@/config/api'
+import { api } from '@/config/api'
 import { useAuth } from '@/composables/useAuth'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -96,8 +96,26 @@ const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })
 }
 
-const getDocumentUrl = (path) => {
-  return `${API_BASE_URL.replace('/api', '')}/storage/${path}`
+const openDocument = async (request) => {
+  try {
+    const res = await api(`/verification-requests/${request.id}/document`, {
+      headers: {
+        Accept: '*/*'
+      }
+    })
+
+    if (!res.ok) return
+
+    const blob = await res.blob()
+    const blobUrl = window.URL.createObjectURL(blob)
+    window.open(blobUrl, '_blank', 'noopener,noreferrer')
+
+    window.setTimeout(() => {
+      window.URL.revokeObjectURL(blobUrl)
+    }, 60_000)
+  } catch (e) {
+    console.error('Error opening verification document', e)
+  }
 }
 </script>
 
@@ -189,10 +207,10 @@ const getDocumentUrl = (path) => {
 
                 <div class="documentSection">
                   <strong>{{ t('admin.verificationDocument') }}</strong>
-                  <a :href="getDocumentUrl(request.document_path)" target="_blank" class="documentLink">
+                  <button type="button" class="documentLink" @click="openDocument(request)">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                     {{ t('admin.viewDocument') }}
-                  </a>
+                  </button>
                 </div>
               </div>
 
@@ -514,6 +532,8 @@ const getDocumentUrl = (path) => {
   transition: all 0.2s;
   font-size: 14px;
   width: fit-content;
+  cursor: pointer;
+  font-family: inherit;
 }
 .documentLink:hover {
   background: #1976d2;
