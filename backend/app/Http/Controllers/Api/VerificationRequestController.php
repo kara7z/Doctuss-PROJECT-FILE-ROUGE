@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\VerificationRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class VerificationRequestController extends Controller
 {
@@ -64,6 +66,30 @@ class VerificationRequestController extends Controller
             ])
             ->latest()
             ->get();
+    }
+
+    public function document(Request $request, VerificationRequest $verificationRequest): BinaryFileResponse|JsonResponse
+    {
+        $user = $request->user();
+        $doctorProfile = $verificationRequest->doctorProfile;
+        $disk = Storage::disk('public');
+
+        $canViewDocument = $user->isAdmin()
+            || ($user->isDoctor() && $doctorProfile && $doctorProfile->user_id === $user->id);
+
+        if (! $canViewDocument) {
+            return response()->json([
+                'message' => 'You are not authorized to view this verification document.',
+            ], 403);
+        }
+
+        if (! $disk->exists($verificationRequest->document_path)) {
+            return response()->json([
+                'message' => 'Verification document not found.',
+            ], 404);
+        }
+
+        return response()->file($disk->path($verificationRequest->document_path));
     }
 
     public function approve(Request $request, VerificationRequest $verificationRequest): JsonResponse
@@ -124,4 +150,3 @@ class VerificationRequestController extends Controller
         ]);
     }
 }
-

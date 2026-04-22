@@ -28,6 +28,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/me',      [AuthController::class, 'me']);
     Route::post('/verification-requests', [VerificationRequestController::class, 'store']);
     Route::get('/verification-requests', [VerificationRequestController::class, 'index']);
+    Route::get('/verification-requests/{verificationRequest}/document', [VerificationRequestController::class, 'document']);
     Route::patch('/verification-requests/{verificationRequest}/approve', [VerificationRequestController::class, 'approve']);
     Route::patch('/verification-requests/{verificationRequest}/reject', [VerificationRequestController::class, 'reject']);
 
