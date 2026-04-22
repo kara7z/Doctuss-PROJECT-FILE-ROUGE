@@ -5,9 +5,10 @@ import { useAuth } from '@/composables/useAuth'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { user } = useAuth()
 const router = useRouter()
+const isRTL = computed(() => locale.value === 'ar')
 
 const users = ref([])
 const loading = ref(true)
@@ -90,6 +91,7 @@ const paginatedUsers = computed(() => {
 const totalPages = computed(() => Math.ceil(filteredUsers.value.length / itemsPerPage))
 
 const changePage = (page) => {
+  if (page < 1 || page > totalPages.value) return
   currentPage.value = page
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -367,27 +369,29 @@ const toggleVerification = async (userObj) => {
                 :disabled="currentPage === 1" 
                 @click="changePage(currentPage - 1)"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                {{ t('admin.previous') }}
+                <svg v-if="!isRTL" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
               </button>
-              
-              <button 
-                v-for="page in totalPages" 
-                :key="page" 
-                class="pageBtn" 
-                :class="{ active: currentPage === page }"
-                @click="changePage(page)"
-              >
-                {{ page }}
-              </button>
-              
+
+              <template v-for="page in totalPages" :key="page">
+                <button
+                  v-if="page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)"
+                  class="pageBtn"
+                  :class="{ active: currentPage === page }"
+                  @click="changePage(page)"
+                >
+                  {{ page }}
+                </button>
+                <span v-else-if="page === currentPage - 2 || page === currentPage + 2" class="pageDots">…</span>
+              </template>
+
               <button 
                 class="pageBtn" 
                 :disabled="currentPage === totalPages" 
                 @click="changePage(currentPage + 1)"
               >
-                {{ t('admin.next') }}
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                <svg v-if="!isRTL" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
               </button>
             </div>
           </div>
@@ -954,43 +958,53 @@ const toggleVerification = async (userObj) => {
   justify-content: center;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
   margin-top: 24px;
-  padding: 20px;
-  background: #fff;
-  border: 3px solid #000;
-  box-shadow: 4px 4px 0px #000;
 }
 
 .pageBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 12px;
   background: #fff;
   border: 3px solid #000;
   font-weight: 900;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
-  box-shadow: 3px 3px 0px #000;
-  transition: all 0.2s;
-  text-transform: uppercase;
+  box-shadow: 4px 4px 0px #000;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: inherit;
 }
 
 .pageBtn:hover:not(:disabled) {
   background: #F6D506;
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px #000;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
 }
 
 .pageBtn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
+  box-shadow: 2px 2px 0px #000;
 }
 
 .pageBtn.active {
   background: #000;
   color: #F6D506;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}
+
+.pageDots {
+  font-size: 18px;
+  font-weight: 900;
+  color: #000;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
 }
 
 @media (max-width: 768px) {

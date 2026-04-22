@@ -5,9 +5,10 @@ import { useAuth } from '@/composables/useAuth'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { user } = useAuth()
 const router = useRouter()
+const isRTL = computed(() => locale.value === 'ar')
 
 const doctors = ref([])
 const loading = ref(true)
@@ -90,6 +91,7 @@ const paginatedReviews = computed(() => {
 const totalPages = computed(() => Math.ceil(filteredReviews.value.length / itemsPerPage))
 
 const changePage = (page) => {
+  if (page < 1 || page > totalPages.value) return
   currentPage.value = page
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
@@ -251,7 +253,8 @@ const renderStars = (rating) => {
                 :disabled="currentPage === 1" 
                 @click="changePage(currentPage - 1)"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <svg v-if="!isRTL" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
               </button>
               
               <template v-for="page in totalPages" :key="page">
@@ -269,7 +272,8 @@ const renderStars = (rating) => {
                 :disabled="currentPage === totalPages" 
                 @click="changePage(currentPage + 1)"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                <svg v-if="!isRTL" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
               </button>
             </div>
           </div>
