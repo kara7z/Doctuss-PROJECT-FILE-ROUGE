@@ -111,7 +111,7 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   const { user, ready, fetchUser } = useAuth()
   
   if (!ready.value) {
@@ -120,20 +120,23 @@ router.beforeEach(async (to, from, next) => {
 
   const suspendedMsg = localStorage.getItem('suspendedMessage')
   if (suspendedMsg && to.path !== '/login') {
-    next('/login')
-    return
+    return '/login'
   }
 
   if (to.meta.guestOnly && user.value) {
-    next('/')
-  } else if (to.meta.requiresAuth && !user.value) {
-    next('/login')
-  } else if (to.meta.requiresDoctor && user.value?.role !== 'doctor') {
-    next('/403')
-  } else if (to.meta.requiresAdmin && user.value?.role !== 'admin') {
-    next('/403')
-  } else {
-    next()
+    return '/'
+  }
+
+  if (to.meta.requiresAuth && !user.value) {
+    return '/login'
+  }
+
+  if (to.meta.requiresDoctor && user.value?.role !== 'doctor') {
+    return '/403'
+  }
+
+  if (to.meta.requiresAdmin && user.value?.role !== 'admin') {
+    return '/403'
   }
 })
 
