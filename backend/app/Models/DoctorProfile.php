@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Validation\ValidationException;
 use App\Enums\AppointmentStatus;
-use App\Models\DoctorWorkingDate;
 
 class DoctorProfile extends Model
 {
@@ -72,11 +71,6 @@ class DoctorProfile extends Model
         return $this->hasMany(Schedule::class, 'doctor_profile_id');
     }
 
-    public function workingDates(): HasMany
-    {
-        return $this->hasMany(DoctorWorkingDate::class, 'doctor_profile_id');
-    }
-
     public function verificationRequests(): HasMany
     {
         return $this->hasMany(VerificationRequest::class);
@@ -90,19 +84,13 @@ class DoctorProfile extends Model
     public function getCurrentStatusAttribute(): string
     {
         $now = now();
-        $todayStr = $now->toDateString();
         $currentTime = $now->format('H:i:s');
         $todayIndex = $now->dayOfWeek;
-        $isDuringShift = $this->workingDates()
-            ->whereDate('working_date', $todayStr)
+        $isDuringShift = $this->schedules()
+            ->where('day_of_week', $todayIndex)
             ->where('start_time', '<=', $currentTime)
             ->where('end_time', '>', $currentTime)
-            ->exists()
-            || $this->schedules()
-                ->where('day_of_week', $todayIndex)
-                ->where('start_time', '<=', $currentTime)
-                ->where('end_time', '>', $currentTime)
-                ->exists();
+            ->exists();
 
         if (!$isDuringShift) {
             return 'Unavailable';

@@ -9,7 +9,6 @@ use App\Models\DoctorProfile;
 use App\Models\Appointment;
 use App\Models\Review;
 use App\Models\Schedule;
-use App\Models\DoctorWorkingDate;
 use App\Enums\Gender;
 use App\Enums\UserStatus;
 use App\Enums\AppointmentStatus;
@@ -100,24 +99,22 @@ class DatabaseSeeder extends Seeder
                 'banner_picture' => $bannerImages[array_rand($bannerImages)],
             ]);
 
-            // Assign random number of working days (3-7 days per week) with varied hours
             $numWorkingDays = rand(3, 7);
             
-            // All possible days (0=Sunday, 1=Monday, ..., 6=Saturday)
+            // (0=Sunday, 1=Monday, ..., 6=Saturday)
             $allDays = [0, 1, 2, 3, 4, 5, 6];
             
-            // Randomly select days
             $daysToSchedule = collect($allDays)->random($numWorkingDays);
             
             foreach ($daysToSchedule as $dayIndex) {
-                // Weekdays (Mon-Fri) typically have longer hours
+                // (Mon-Fri) 
                 if (in_array($dayIndex, [1, 2, 3, 4, 5])) {
                     $startHour = rand(7, 9); // Start between 7am-9am
                     $duration = rand(7, 10); // Work 7-10 hours
                 } else {
-                    // Weekends (Sat-Sun) typically have shorter hours
-                    $startHour = rand(8, 10); // Start between 8am-10am
-                    $duration = rand(4, 6); // Work 4-6 hours
+                    // Weekends (Sat-Sun)
+                    $startHour = rand(8, 10);
+                    $duration = rand(4, 6);
                 }
                 
                 $endHour = $startHour + $duration;
@@ -130,25 +127,7 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
 
-            // Assign at least 5 explicit working dates spread across the next 4 weeks
-            $usedDates = [];
-            $numDates   = rand(5, 8);
-            for ($d = 0; $d < $numDates; $d++) {
-                $daysAhead = rand(1, 28);
-                $candidate = now()->addDays($daysAhead)->toDateString();
-                if (in_array($candidate, $usedDates)) {
-                    continue;
-                }
-                $usedDates[] = $candidate;
-                $startHour = rand(8, 11);
-                DoctorWorkingDate::create([
-                    'doctor_profile_id' => $profile->id,
-                    'working_date'      => $candidate,
-                    'start_time'        => sprintf('%02d:00:00', $startHour),
-                    'end_time'          => sprintf('%02d:00:00', $startHour + rand(4, 8)),
-                ]);
-            }
-        } // end foreach ($doctors as $doctor)
+        } 
 
         User::factory()->count(20)->create([
             'role' => 'client'

@@ -97,35 +97,24 @@ class DoctorController extends Controller
         if ($request->has('status') && in_array($request->input('status'), ['Available', 'Busy', 'Unavailable'])) {
             $status = $request->input('status');
             $now = now();
-            $todayStr = $now->toDateString();
             $currentTime = $now->format('H:i:s');
             $todayIndex = $now->dayOfWeek;
             $hourAgo = $now->copy()->subHour();
 
             if ($status === 'Unavailable') {
-                $query->whereHas('doctorProfile', function ($dp) use ($todayStr, $currentTime, $todayIndex) {
-                    $dp->whereDoesntHave('workingDates', function ($wd) use ($todayStr, $currentTime) {
-                        $wd->whereDate('working_date', $todayStr)
-                           ->where('start_time', '<=', $currentTime)
-                           ->where('end_time', '>', $currentTime);
-                    })->whereDoesntHave('schedules', function ($s) use ($todayIndex, $currentTime) {
+                $query->whereHas('doctorProfile', function ($dp) use ($currentTime, $todayIndex) {
+                    $dp->whereDoesntHave('schedules', function ($s) use ($todayIndex, $currentTime) {
                         $s->where('day_of_week', $todayIndex)
                           ->where('start_time', '<=', $currentTime)
                           ->where('end_time', '>', $currentTime);
                     });
                 });
             } else {
-                $query->whereHas('doctorProfile', function ($dp) use ($todayStr, $currentTime, $todayIndex, $now, $hourAgo, $status) {
-                    $dp->where(function ($q) use ($todayStr, $currentTime, $todayIndex) {
-                        $q->whereHas('workingDates', function ($wd) use ($todayStr, $currentTime) {
-                            $wd->whereDate('working_date', $todayStr)
-                               ->where('start_time', '<=', $currentTime)
-                               ->where('end_time', '>', $currentTime);
-                        })->orWhereHas('schedules', function ($s) use ($todayIndex, $currentTime) {
-                            $s->where('day_of_week', $todayIndex)
-                              ->where('start_time', '<=', $currentTime)
-                              ->where('end_time', '>', $currentTime);
-                        });
+                $query->whereHas('doctorProfile', function ($dp) use ($currentTime, $todayIndex, $now, $hourAgo, $status) {
+                    $dp->whereHas('schedules', function ($s) use ($todayIndex, $currentTime) {
+                        $s->where('day_of_week', $todayIndex)
+                          ->where('start_time', '<=', $currentTime)
+                          ->where('end_time', '>', $currentTime);
                     });
 
                     if ($status === 'Available') {
@@ -165,7 +154,7 @@ class DoctorController extends Controller
         
         $doctors = $query->with(['doctorProfile' => function ($query) {
             $query->withCount('reviews')
-                  ->with(['specialty.category', 'schedules', 'workingDates', 'reviews.user', 'appointments' => function($q) {
+                  ->with(['specialty.category', 'schedules', 'reviews.user', 'appointments' => function($q) {
                       $q->whereIn('status', ['approved', 'pending']);
                   }]);
         }])->paginate($perPage);
@@ -190,7 +179,6 @@ class DoctorController extends Controller
                       'schedules' => function($q) {
                           $q->orderBy('day_of_week');
                       }, 
-                      'workingDates', 
                       'reviews.user', 
                       'appointments' => function($q) {
                           $q->whereIn('status', ['approved', 'pending']);
@@ -218,7 +206,7 @@ class DoctorController extends Controller
     public function cities()
     {
         return response()->json([
-            'data' => \App\Models\DoctorProfile::distinct()
+            'data' => DoctorProfile::distinct()
                 ->orderBy('city')
                 ->pluck('city')
                 ->filter()

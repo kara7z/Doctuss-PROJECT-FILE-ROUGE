@@ -73,12 +73,6 @@ class DoctorResource extends JsonResource
                             'email' => $r->user->email,
                         ] : null,
                     ])->sortByDesc('created_at')->values() : null,
-                    'working_dates' => $profile->relationLoaded('workingDates') ? $profile->workingDates->map(fn($wd) => [
-                        'id'           => $wd->id,
-                        'working_date' => $wd->working_date->toDateString(),
-                        'start_time'   => $wd->start_time,
-                        'end_time'     => $wd->end_time,
-                    ])->sortBy('working_date')->values() : null,
                 ];
             }),
             'created_at' => $this->created_at,

@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\DoctorProfileController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\VerificationRequestController;
-use App\Http\Controllers\Api\WorkingDateController;
 use Illuminate\Support\Facades\Route;
 
 // ── Public ────────────────────────────────────────────────────
@@ -38,7 +37,6 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('/doctor/profile', [DoctorProfileController::class, 'show']);
         Route::patch('/doctor/profile', [DoctorProfileController::class, 'update']);
         Route::apiResource('schedules', ScheduleController::class);
-        Route::post('/working-dates', [WorkingDateController::class, 'store']);
     });
 
     Route::apiResource('reviews', ReviewController::class)
