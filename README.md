@@ -9,6 +9,28 @@ This repository is organized as a multi-part workspace:
 - `document/` contains project documentation and specifications
 - `preview/` contains diagrams and interface screenshots
 
+## Screenshots And Diagrams
+
+### UML Diagram
+
+![UML Diagram](preview/uml%20diagram.png)
+
+### Use Case Diagram
+
+![Use Case Diagram](preview/Use%20case%20diagram.png)
+
+### Search Doctors
+
+![Search Doctors](preview/search.png)
+
+### Doctor Profile
+
+![Doctor Profile](preview/doctor_profile.png)
+
+### Admin User Management
+
+![Admin User Management](preview/users.png)
+
 ## Product Overview
 
 Doctuss is designed around three primary user roles:
@@ -127,28 +149,6 @@ The frontend development server will usually be available at `http://127.0.0.1:5
 - `npm run dev` starts the Vite development server
 - `npm run build` creates a production build
 - `npm run preview` previews the production build locally
-
-## Screenshots And Diagrams
-
-### UML Diagram
-
-![UML Diagram](preview/uml%20diagram.png)
-
-### Use Case Diagram
-
-![Use Case Diagram](preview/Use%20case%20diagram.png)
-
-### Search Doctors
-
-![Search Doctors](preview/search.png)
-
-### Doctor Profile
-
-![Doctor Profile](preview/doctor_profile.png)
-
-### Admin User Management
-
-![Admin User Management](preview/users.png)
 
 ## Documentation
 
