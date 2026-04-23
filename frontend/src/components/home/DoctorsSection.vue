@@ -81,8 +81,7 @@ const fetchDoctors = async () => {
           status: dp.current_status || 'Unavailable',
           city: dp.city || 'Unknown',
           avatarGradient: `linear-gradient(135deg, ${c1}, ${c2})`,
-          category: spec.category?.name || 'General',
-          categoryId: spec.category?.id
+          category: spec.category?.name || 'General'
         }
       })
     }

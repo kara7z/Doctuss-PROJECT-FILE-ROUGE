@@ -35,19 +35,10 @@ const verificationForm = ref({
 })
 
 const schedules = ref([])
-const workingDates = ref([])
 const scheduleModal = ref(false)
 const scheduleForm = ref({
   id: null,
   day_of_week: 0,
-  start_time: '',
-  end_time: '',
-  submitting: false,
-  error: null
-})
-const workingDateModal = ref(false)
-const workingDateForm = ref({
-  working_date: '',
   start_time: '',
   end_time: '',
   submitting: false,
@@ -176,45 +167,6 @@ const deleteSchedule = async (id) => {
     }
   } catch (e) {
     console.error('Error deleting schedule', e)
-  }
-}
-
-const openWorkingDateModal = () => {
-  workingDateForm.value = {
-    working_date: '',
-    start_time: '',
-    end_time: '',
-    submitting: false,
-    error: null
-  }
-  workingDateModal.value = true
-}
-
-const saveWorkingDate = async () => {
-  workingDateForm.value.submitting = true
-  workingDateForm.value.error = null
-  try {
-    const payload = {
-      working_date: workingDateForm.value.working_date,
-      start_time: workingDateForm.value.start_time.substring(0, 5),
-      end_time: workingDateForm.value.end_time.substring(0, 5)
-    }
-    
-    const res = await api('/working-dates', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    })
-    if (res.ok) {
-      workingDateModal.value = false
-      alert('Working date added successfully')
-    } else {
-      const data = await res.json()
-      workingDateForm.value.error = data.message || t('common.error')
-    }
-  } catch (e) {
-    workingDateForm.value.error = t('common.error')
-  } finally {
-    workingDateForm.value.submitting = false
   }
 }
 
