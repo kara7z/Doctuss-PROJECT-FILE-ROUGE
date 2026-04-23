@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\DoctorProfile;
 use App\Models\DoctorSpecialty;
 use App\Models\DoctorCategory;
 use App\Http\Resources\DoctorResource;
@@ -15,6 +16,24 @@ class DoctorController extends Controller
     {
         $query = User::where('role', 'doctor')
             ->whereHas('doctorProfile');
+
+        $sort = $request->input('sort');
+
+        if ($sort && in_array($sort, ['rating', 'experience'], true)) {
+            $query->join('doctor_profiles as sort_profile', 'sort_profile.user_id', '=', 'users.id')
+                ->select('users.*');
+
+            if ($sort === 'rating') {
+                $query->orderByDesc('sort_profile.avg_rating')
+                    ->orderByDesc('users.id');
+            }
+
+            if ($sort === 'experience') {
+                $query->orderByRaw('sort_profile.experience_start_date IS NULL')
+                    ->orderBy('sort_profile.experience_start_date')
+                    ->orderByDesc('users.id');
+            }
+        }
 
         if ($request->has('q') && !empty($request->input('q'))) {
             $searchTerm = $request->input('q');

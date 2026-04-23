@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { api } from '@/config/api'
 import { useI18n } from 'vue-i18n'
 
@@ -27,11 +27,28 @@ const tabs = [
 
 const doctors = ref([])
 
+const getDoctorEndpoint = () => {
+  const params = new URLSearchParams()
+
+  if (activeTab.value === 'rated') {
+    params.append('sort', 'rating')
+    params.append('per_page', '15')
+  } else if (activeTab.value === 'experience') {
+    params.append('sort', 'experience')
+    params.append('per_page', '15')
+  } else {
+    params.append('per_page', '100')
+  }
+
+  return `/doctors?${params.toString()}`
+}
+
 const fetchDoctors = async () => {
   try {
-    const res = await api('/doctors')
+    const res = await api(getDoctorEndpoint())
     if (res.ok) {
-      const { data } = await res.json()
+      const json = await res.json()
+      const data = json.data || []
       
       const colors = [
         ['#667eea', '#764ba2'], ['#f093fb', '#f5576c'], ['#4facfe', '#00f2fe'],
@@ -78,6 +95,10 @@ onMounted(() => {
   fetchDoctors()
 })
 
+watch(activeTab, () => {
+  fetchDoctors()
+})
+
 const popularCategoryDoctors = computed(() => {
   const seen = new Set()
   return doctors.value.filter(d => {
@@ -90,9 +111,9 @@ const popularCategoryDoctors = computed(() => {
 const filteredDoctors = computed(() => {
   let result = doctors.value
   if (activeTab.value === 'rated') {
-    result = [...doctors.value].sort((a, b) => b.rating - a.rating)
+    result = doctors.value
   } else if (activeTab.value === 'experience') {
-    result = [...doctors.value].sort((a, b) => b.experience - a.experience)
+    result = doctors.value
   } else if (activeTab.value === 'popular') {
     result = popularCategoryDoctors.value
   }
