@@ -9,7 +9,7 @@ This document serves as a centralized hub for all external resources, design fil
 
 ## 📋 Project Management & Planning
 
-*   **Trello Board:** [Link to Trello Board] <!-- Add your Trello link here -->
+*   **Trello Board:** [Link to Trello Board](https://trello.com/invite/b/69ea814770af599584fd53c6/ATTI0e60c2b2805e1bda56a55fc33dbea3a76D90865D/doctuss) <!-- Add your Trello link here -->
     *Used for sprint planning, task tracking, and backlog management.*
 
 ## 📁 Documentation & Presentations
