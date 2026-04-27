@@ -266,10 +266,6 @@ watch(() => route.query, (newQuery) => {
                 <span>{{ t('search.status.available') }}</span>
               </label>
               <label class="radioLabel">
-                <input type="radio" name="status" value="Busy" v-model="filters.status" @change="applyFilters">
-                <span>{{ t('search.status.busy') }}</span>
-              </label>
-              <label class="radioLabel">
                 <input type="radio" name="status" value="Unavailable" v-model="filters.status" @change="applyFilters"> 
                 <span>{{ t('search.status.unavailable') }}</span>
               </label>
