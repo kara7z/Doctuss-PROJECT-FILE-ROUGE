@@ -17,6 +17,7 @@ class UserResource extends JsonResource
             'status' => $this->status?->value ?? $this->status,
             'gender' => $this->gender?->value ?? $this->gender,
             'birthday' => $this->birthday,
+            'age' => $this->age,
             'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

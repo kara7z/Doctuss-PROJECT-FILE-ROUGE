@@ -19,6 +19,7 @@ class DoctorResource extends JsonResource
             'status' => $this->status?->value ?? $this->status,
             'gender' => $this->gender?->value ?? $this->gender,
             'birthday' => $this->birthday,
+            'age' => $this->age,
             'doctor_profile' => $this->whenLoaded('doctorProfile', function () use ($profile) {
                 $specialty = $profile->relationLoaded('specialty') ? $profile->specialty : null;
                 $category = $specialty && $specialty->relationLoaded('category') ? $specialty->category : null;

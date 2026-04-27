@@ -115,7 +115,9 @@
   "common": {
     "loading": "جارٍ التحميل...",
     "error": "خطأ",
-    "success": "تم بنجاح"
+    "success": "تم بنجاح",
+    "age": "العمر",
+    "yearsOld": "سنة"
   },
   "whyUs": {
     "title": "لماذا نحن؟",

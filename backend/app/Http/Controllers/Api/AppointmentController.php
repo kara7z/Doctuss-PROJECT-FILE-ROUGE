@@ -19,7 +19,7 @@ class AppointmentController extends Controller
         $this->authorize('viewAny', Appointment::class);
 
         $query = Appointment::query()
-            ->with(['client:id,name,email', 'doctorProfile.user:id,name,email', 'review']);
+            ->with(['client:id,name,email,birthday,gender', 'doctorProfile.user:id,name,email', 'review']);
 
         $user = $request->user();
         if ($user->isClient()) {
@@ -91,7 +91,7 @@ class AppointmentController extends Controller
             'status' => $data['status'] ?? AppointmentStatus::PENDING->value,
         ]);
 
-        return new AppointmentResource($appointment->load(['client:id,name,email', 'doctorProfile.user:id,name,email']));
+        return new AppointmentResource($appointment->load(['client:id,name,email,birthday,gender', 'doctorProfile.user:id,name,email']));
     }
 
     public function show(Appointment $appointment): AppointmentResource
@@ -99,7 +99,7 @@ class AppointmentController extends Controller
         $this->authorize('view', $appointment);
 
         return new AppointmentResource(
-            $appointment->load(['client:id,name,email', 'doctorProfile.user:id,name,email', 'review'])
+            $appointment->load(['client:id,name,email,birthday,gender', 'doctorProfile.user:id,name,email', 'review'])
         );
     }
 
@@ -150,7 +150,7 @@ class AppointmentController extends Controller
         $appointment->update($data);
 
         return new AppointmentResource(
-            $appointment->fresh()->load(['client:id,name,email', 'doctorProfile.user:id,name,email'])
+            $appointment->fresh()->load(['client:id,name,email,birthday,gender', 'doctorProfile.user:id,name,email'])
         );
     }
 

@@ -323,6 +323,10 @@ const toggleVerification = async (userObj) => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
                     <span><strong>{{ t('admin.gender') }}:</strong> {{ t('admin.' + userObj.gender) }}</span>
                   </div>
+                  <div class="infoRow" v-if="userObj.age !== null && userObj.age !== undefined">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                    <span><strong>{{ t('common.age') }}:</strong> {{ userObj.age }} {{ t('common.yearsOld') }}</span>
+                  </div>
                 </div>
 
                 <div class="cardActions">

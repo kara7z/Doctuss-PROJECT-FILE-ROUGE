@@ -115,7 +115,9 @@
   "common": {
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "age": "Age",
+    "yearsOld": "years old"
   },
   "whyUs": {
     "title": "WHY CHOSE US?",

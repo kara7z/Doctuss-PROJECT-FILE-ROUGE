@@ -24,6 +24,8 @@ class AppointmentResource extends JsonResource
                     'id' => $this->client->id,
                     'name' => $this->client->name,
                     'email' => $this->client->email,
+                    'age' => $this->client->age,
+                    'gender' => $this->client->gender?->value ?? $this->client->gender,
                 ];
             }),
             'doctor_profile' => $doctorProfile ? [

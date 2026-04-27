@@ -43,6 +43,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function getAgeAttribute(): ?int
+    {
+        return $this->birthday?->age;
+    }
+
 
     public function isClient(): bool  { return $this->role === 'client'; }
     public function isDoctor(): bool  { return $this->role === 'doctor'; }

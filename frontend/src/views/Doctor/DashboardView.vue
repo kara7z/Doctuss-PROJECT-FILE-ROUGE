@@ -265,6 +265,14 @@ const getTodayString = () => {
                 </div>
                 
                 <div class="cardBody">
+                  <div v-if="app.client?.gender" class="infoRow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                    <span><strong>{{ t('search.gender') }}</strong> {{ app.client.gender === 'male' ? t('search.male') : t('search.female') }}</span>
+                  </div>
+                  <div v-if="app.client?.age !== null && app.client?.age !== undefined" class="infoRow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                    <span><strong>{{ t('common.age') }}</strong> {{ app.client.age }} {{ t('common.yearsOld') }}</span>
+                  </div>
                   <div class="infoRow">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                     <span><strong>{{ t('doctorDashboard.requestedTime') }}</strong> {{ formatDate(app.preferred_at) }}</span>
@@ -333,6 +341,14 @@ const getTodayString = () => {
                 </div>
                 
                 <div class="cardBody">
+                  <div v-if="app.client?.gender" class="infoRow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                    <span><strong>{{ t('search.gender') }}</strong> {{ app.client.gender === 'male' ? t('search.male') : t('search.female') }}</span>
+                  </div>
+                  <div v-if="app.client?.age !== null && app.client?.age !== undefined" class="infoRow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                    <span><strong>{{ t('common.age') }}</strong> {{ app.client.age }} {{ t('common.yearsOld') }}</span>
+                  </div>
                   <div class="infoRow">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                     <span><strong>{{ t('doctorDashboard.appointmentTime') }}</strong> {{ formatDate(app.proposed_at || app.preferred_at) }}</span>
@@ -397,6 +413,14 @@ const getTodayString = () => {
                 </div>
                 
                 <div class="cardBody">
+                  <div v-if="app.client?.gender" class="infoRow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                    <span><strong>{{ t('search.gender') }}</strong> {{ app.client.gender === 'male' ? t('search.male') : t('search.female') }}</span>
+                  </div>
+                  <div v-if="app.client?.age !== null && app.client?.age !== undefined" class="infoRow">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                    <span><strong>{{ t('common.age') }}</strong> {{ app.client.age }} {{ t('common.yearsOld') }}</span>
+                  </div>
                   <div class="infoRow">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                     <span><strong>{{ t('doctorDashboard.completed') }}</strong> {{ formatDate(app.proposed_at || app.preferred_at) }}</span>

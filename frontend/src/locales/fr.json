@@ -115,7 +115,9 @@
   "common": {
     "loading": "Chargement...",
     "error": "Erreur",
-    "success": "Succès"
+    "success": "Succès",
+    "age": "Âge",
+    "yearsOld": "ans"
   },
   "whyUs": {
     "title": "Pourquoi nous choisir ?",

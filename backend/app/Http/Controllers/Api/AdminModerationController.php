@@ -32,6 +32,7 @@ class AdminModerationController extends Controller
                     'status' => $user->status->value,
                     'gender' => $user->gender?->value,
                     'birthday' => $user->birthday,
+                    'age' => $user->age,
                     'created_at' => $user->created_at,
                     'doctor_profile' => $user->doctorProfile ? [
                         'id' => $user->doctorProfile->id,
