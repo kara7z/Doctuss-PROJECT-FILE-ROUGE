@@ -10,17 +10,17 @@ const doctorsScrollRef = ref(null)
 const tabs = [
   {
     key: 'rated',
-    label: computed(() => t('doctors.tabs.mostRated')),
+    labelKey: 'doctors.tabs.mostRated',
     svg: '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
   },
   {
     key: 'experience',
-    label: computed(() => t('doctors.tabs.experience')),
+    labelKey: 'doctors.tabs.experience',
     svg: '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>',
   },
   {
     key: 'popular',
-    label: computed(() => t('doctors.tabs.popular')),
+    labelKey: 'doctors.tabs.popular',
     svg: '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
   },
 ]
@@ -144,7 +144,7 @@ const scrollDoctors = (dir) => {
           @click="activeTab = tab.key"
         >
           <span class="filterTabIcon" v-html="tab.svg"></span>
-          {{ tab.label }}
+          {{ t(tab.labelKey) }}
         </button>
       </div>
     </div>

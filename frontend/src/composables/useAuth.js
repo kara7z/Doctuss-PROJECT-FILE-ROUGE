@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import router from '@/router'
-import { api, clearAuthToken } from '@/config/api'
+import { api, clearAuthToken, getAuthToken } from '@/config/api'
 
 const user    = ref(null)
 const loading = ref(false)
@@ -11,6 +11,12 @@ let fetchPromise = null
 const fetchUser = async () => {
   if (ready.value) return
   if (fetchPromise) return fetchPromise
+
+  if (!getAuthToken()) {
+    user.value = null
+    ready.value = true
+    return
+  }
 
   fetchPromise = (async () => {
     loading.value = true

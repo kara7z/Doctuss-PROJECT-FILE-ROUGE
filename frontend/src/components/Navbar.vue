@@ -128,12 +128,14 @@ a {
   border: black 3px solid;
   color: black;
   box-shadow: rgba(0, 0, 0, 0.25) 0px 4px 4px;
+}
+
 .nav > a {
   font-weight: 900;
   letter-spacing: -1px;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.2s ease;
 }
-}
+
 .nav > a:hover {
   transform: translate(-2px, -2px) scale(1.02);
   text-shadow: 4px 4px 0px rgba(0,0,0,1);

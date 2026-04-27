@@ -1,13 +1,40 @@
 import router from '@/router'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
-const SANCTUM_URL  = import.meta.env.VITE_SANCTUM_URL  || '/sanctum/csrf-cookie'
-const AUTH_TOKEN_KEY = 'auth_token'
+const LOCAL_LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1'])
 
-const getCookie = (name) => {
-  const match = document.cookie.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]*)'))
-  return match ? decodeURIComponent(match[1]) : null
+const resolveLocalUrl = (configuredUrl, fallbackPath) => {
+  if (typeof window === 'undefined') {
+    return configuredUrl || fallbackPath
+  }
+
+  if (!configuredUrl) {
+    return `${window.location.origin}${fallbackPath}`
+  }
+
+  try {
+    const currentUrl = new URL(window.location.origin)
+    const targetUrl = new URL(configuredUrl, window.location.origin)
+    const isLoopbackMismatch =
+      LOCAL_LOOPBACK_HOSTS.has(currentUrl.hostname) &&
+      LOCAL_LOOPBACK_HOSTS.has(targetUrl.hostname) &&
+      currentUrl.hostname !== targetUrl.hostname
+
+    if (
+      isLoopbackMismatch &&
+      currentUrl.protocol === targetUrl.protocol &&
+      currentUrl.port === targetUrl.port
+    ) {
+      return `${window.location.origin}${fallbackPath}`
+    }
+
+    return targetUrl.toString()
+  } catch {
+    return configuredUrl
+  }
 }
+
+const API_BASE_URL = resolveLocalUrl(import.meta.env.VITE_API_BASE_URL, '/api')
+const AUTH_TOKEN_KEY = 'auth_token'
 
 const getAuthToken = () => localStorage.getItem(AUTH_TOKEN_KEY)
 
@@ -22,18 +49,14 @@ const clearAuthToken = () => {
 }
 
 export const api = async (endpoint, options = {}) => {
-  await fetch(SANCTUM_URL, { credentials: 'include' })
-  
-  const xsrfToken = getCookie('XSRF-TOKEN')
   const authToken = getAuthToken()
 
   const config = {
     ...options,
-    credentials: 'include',
+    credentials: 'omit',
     headers: {
       'Accept': 'application/json',
       ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-      ...(xsrfToken ? { 'X-XSRF-TOKEN': xsrfToken } : {}),
       ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
       ...options.headers,
     },
